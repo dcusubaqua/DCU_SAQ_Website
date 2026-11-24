@@ -207,6 +207,26 @@ p {
 
 .ocean-sun {
   opacity: var(--sun);
+  /* As you descend the rays lengthen and the bright end slides up out of
+     view with the surface. */
+  transform-origin: 50% 0;
+  transform: translateY(calc(var(--surface, 0) * -14vh)) scaleY(calc(1 + var(--surface, 0) * .5));
+}
+
+.ocean > .ocean-surface {
+  inset: 0 0 auto;
+  height: min(36vh, 340px);
+  opacity: var(--sun);
+  translate: 0 calc(var(--surface, 0) * -100%);
+  filter: blur(1.5px);
+  -webkit-mask-image: linear-gradient(#000 35%, transparent);
+  mask-image: linear-gradient(#000 35%, transparent);
+}
+
+.surface-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .ray {
@@ -221,6 +241,24 @@ p {
   animation: ray-sway var(--d) ease-in-out infinite alternate;
 }
 
+/* A narrower, brighter core that flickers on its own, faster beat, as the
+   waves overhead focus and spread the light. */
+.ray::after {
+  content: "";
+  position: absolute;
+  inset: 0 22%;
+  background: linear-gradient(180deg, rgb(235 255 250 / .5), rgb(210 252 246 / .12) 36%, transparent 64%);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  animation: ray-flicker calc(var(--d) * .29) ease-in-out infinite alternate;
+}
+
+@keyframes ray-flicker {
+  0% { opacity: .1; translate: -12% 0; }
+  40% { opacity: .9; }
+  70% { opacity: .35; }
+  100% { opacity: 1; translate: 14% 0; }
+}
+
 .ray::before {
   content: "";
   position: absolute;
@@ -231,12 +269,18 @@ p {
 
 @keyframes ray-sway {
   from {
-    rotate: calc(var(--r) - 2.5deg);
-    opacity: .45;
+    rotate: calc(var(--r) - 3.5deg);
+    scale: .8 1;
+    opacity: .4;
+  }
+
+  50% {
+    opacity: .85;
   }
 
   to {
-    rotate: calc(var(--r) + 2.5deg);
+    rotate: calc(var(--r) + 3.5deg);
+    scale: 1.2 1.04;
     opacity: 1;
   }
 }
@@ -275,6 +319,13 @@ p {
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+/* Clip shapes inherit visibility, and a hidden one clips everything away.
+   Creatures start hidden until the script places them, so keep the clip
+   shapes visible (they are never painted themselves). */
+.creature clipPath * {
+  visibility: visible;
 }
 
 .creature-turtle {
@@ -316,6 +367,20 @@ p {
   to { rotate: var(--sweep); }
 }
 
+/* The head reaches forward on the power stroke and looks around a little. */
+.turtle-head {
+  transform-box: view-box;
+  transform-origin: 168px 100px;
+  animation: turtle-head 6.4s ease-in-out infinite;
+}
+
+@keyframes turtle-head {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(3px) rotate(-5deg); }
+  50% { transform: translateX(1px) rotate(1deg); }
+  75% { transform: translateX(4px) rotate(5deg); }
+}
+
 .creature-shark {
   width: clamp(300px, 36vw, 540px);
   aspect-ratio: 900 / 357;
@@ -333,11 +398,34 @@ p {
 .shark-body {
   position: absolute;
   inset: 0;
-  background: currentColor;
-  -webkit-mask: url("assets/ocean/shark.webp") center / contain no-repeat;
-  mask: url("assets/ocean/shark.webp") center / contain no-repeat;
   transform-origin: 30% 50%;
   animation: shark-swim 2.6s ease-in-out infinite alternate;
+}
+
+/* The silhouette is drawn twice: the body, and the tail from the caudal
+   peduncle back, which beats from side to side (up and down on screen,
+   since we see the shark side-on) a beat ahead of the body. */
+.shark-front,
+.shark-tail {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: url("assets/ocean/shark.webp") center / contain no-repeat, linear-gradient(90deg, #000 79%, transparent 83%);
+  -webkit-mask-composite: source-in;
+  mask: url("assets/ocean/shark.webp") center / contain no-repeat intersect, linear-gradient(90deg, #000 79%, transparent 83%);
+}
+
+.shark-tail {
+  -webkit-mask: url("assets/ocean/shark.webp") center / contain no-repeat, linear-gradient(90deg, transparent 77%, #000 81%);
+  -webkit-mask-composite: source-in;
+  mask: url("assets/ocean/shark.webp") center / contain no-repeat intersect, linear-gradient(90deg, transparent 77%, #000 81%);
+  transform-origin: 80% 46%;
+  animation: shark-tail 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes shark-tail {
+  from { transform: rotate(-7deg) scaleY(.94); }
+  to { transform: rotate(7deg) scaleY(1.04); }
 }
 
 @keyframes shark-swim {
@@ -352,13 +440,40 @@ p {
   --mark: rgb(70 104 124);
 }
 
-.creature-manta svg {
-  animation: manta-flap 6s ease-in-out infinite;
+/* Seen from above, a wingbeat shows as the wings foreshortening while their
+   tips trail behind the body, so each wing is squashed and skewed about the
+   body's centre line. The tail lags behind. */
+.manta-wing {
+  transform-box: view-box;
+  transform-origin: 200px 180px;
+  animation: manta-wing-top 5.2s cubic-bezier(.45, 0, .35, 1) infinite;
 }
 
-@keyframes manta-flap {
-  0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(.97, .8); }
+.manta-wing-bottom {
+  animation-name: manta-wing-bottom;
+}
+
+.manta-tail {
+  transform-box: view-box;
+  transform-origin: 84px 180px;
+  animation: manta-tail 5.2s ease-in-out -1.2s infinite;
+}
+
+@keyframes manta-wing-top {
+  0%, 100% { transform: scaleY(1) skewX(0deg); }
+  30% { transform: scaleY(1.03) skewX(-4deg); }
+  65% { transform: scaleY(.62) skewX(10deg); }
+}
+
+@keyframes manta-wing-bottom {
+  0%, 100% { transform: scaleY(1) skewX(0deg); }
+  30% { transform: scaleY(1.03) skewX(4deg); }
+  65% { transform: scaleY(.62) skewX(-10deg); }
+}
+
+@keyframes manta-tail {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
 }
 
 .creature-whale {
@@ -376,6 +491,29 @@ p {
 @keyframes whale-glide {
   from { transform: rotate(-1.4deg); }
   to { transform: rotate(1.6deg); }
+}
+
+/* Slow, heavy fluke strokes; the long flipper steers. */
+.whale-fluke {
+  transform-box: view-box;
+  transform-origin: 192px 178px;
+  animation: whale-fluke 7s ease-in-out infinite;
+}
+
+.whale-flipper {
+  transform-box: view-box;
+  transform-origin: 776px 216px;
+  animation: whale-flipper 9s ease-in-out infinite alternate;
+}
+
+@keyframes whale-fluke {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(8deg); }
+}
+
+@keyframes whale-flipper {
+  from { transform: rotate(-5deg); }
+  to { transform: rotate(7deg); }
 }
 
 .creature-jelly {
@@ -416,6 +554,29 @@ p {
   to { transform: skewX(-4deg) scaleY(.94); }
 }
 
+/* Each set of tentacles sways on its own beat, so they drift apart and
+   back together instead of moving as one sheet. */
+.strand {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: strand 5.2s ease-in-out infinite alternate;
+}
+
+.strand-arms {
+  animation-duration: 3.9s;
+  animation-delay: -1.4s;
+}
+
+.strand-core {
+  animation-duration: 4.6s;
+  animation-delay: -2.6s;
+}
+
+@keyframes strand {
+  from { transform: skewX(-6deg) scaleY(1.03); }
+  to { transform: skewX(7deg) scaleY(.95); }
+}
+
 .creature-angler {
   width: clamp(130px, 13vw, 190px);
   color: rgb(14 26 38);
@@ -436,6 +597,28 @@ p {
   background: #e6fffb;
   box-shadow: 0 0 10px 4px rgb(150 255 236 / .75), 0 0 46px 18px rgb(80 220 210 / .28);
   animation: lure 4.2s ease-in-out infinite;
+}
+
+.angler-tail {
+  transform-box: view-box;
+  transform-origin: 48px 106px;
+  animation: angler-tail 1.9s ease-in-out infinite alternate;
+}
+
+.angler-fin {
+  transform-box: view-box;
+  transform-origin: 137px 121px;
+  animation: angler-fin 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes angler-tail {
+  from { transform: rotate(-9deg) scaleX(.94); }
+  to { transform: rotate(8deg) scaleX(1.04); }
+}
+
+@keyframes angler-fin {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(16deg); }
 }
 
 @keyframes lure {
@@ -946,37 +1129,96 @@ p {
   to { top: 100%; }
 }
 
+/* The diver is a photo of a club member, cut out of its background. The
+   same image is stacked three times and masked so the legs and the raised
+   forearm can move on their own: the legs kick from the hip and the hand
+   waves from the elbow, while the whole diver drifts. Each moving part
+   fades in over a band where the body underneath stays solid, so no gap
+   opens at the joins. */
 .hero-diver {
   position: absolute;
   z-index: 1;
-  top: 15vh;
-  right: max(5vw, var(--side) + 3vw);
-  width: clamp(150px, 17vw, 270px);
-  aspect-ratio: 395 / 640;
-  rotate: -16deg;
-  animation: diver-hover 10s ease-in-out infinite alternate;
+  top: clamp(4.5rem, 13vh, 9rem);
+  right: max(1vw, var(--side) - 2vw);
+  width: clamp(300px, 40vw, 660px);
+  aspect-ratio: 1141 / 937;
+  pointer-events: none;
+  filter: drop-shadow(0 24px 32px rgb(0 25 40 / .22));
+  animation: diver-drift 11s ease-in-out infinite alternate;
 }
 
-.hero-diver-body {
+.diver-photo {
   position: absolute;
   inset: 0;
-  background: #052a35;
-  opacity: .72;
-  -webkit-mask: url("assets/ocean/diver.webp") center / contain no-repeat;
-  mask: url("assets/ocean/diver.webp") center / contain no-repeat;
+  filter: saturate(.85) brightness(.95);
+  /* The photo cuts off at the fins; let them fade into the water. */
+  -webkit-mask-image: linear-gradient(135deg, #000 80%, transparent 95%);
+  mask-image: linear-gradient(135deg, #000 80%, transparent 95%);
+}
+
+.diver-part {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  -webkit-user-drag: none;
+}
+
+.diver-core {
+  -webkit-mask-image:
+    linear-gradient(135deg, #000 62.5%, transparent 64%),
+    linear-gradient(47.8deg, #000 67.5%, transparent 68.5%),
+    linear-gradient(180deg, transparent 38%, #000 40%);
+  -webkit-mask-composite: source-in, source-over, source-over;
+  mask-image:
+    linear-gradient(135deg, #000 62.5%, transparent 64%),
+    linear-gradient(47.8deg, #000 67.5%, transparent 68.5%),
+    linear-gradient(180deg, transparent 38%, #000 40%);
+  mask-composite: intersect, add, add;
+}
+
+.diver-legs {
+  transform-origin: 55% 66%;
+  -webkit-mask-image: linear-gradient(135deg, transparent 57%, #000 62%);
+  mask-image: linear-gradient(135deg, transparent 57%, #000 62%);
+  animation: diver-kick 2.8s ease-in-out infinite alternate;
+}
+
+.diver-arm {
+  transform-origin: 47% 11%;
+  -webkit-mask-image:
+    linear-gradient(47.8deg, transparent 62%, #000 67%),
+    linear-gradient(180deg, #000 40%, transparent 46%);
+  -webkit-mask-composite: source-in, source-over;
+  mask-image:
+    linear-gradient(47.8deg, transparent 62%, #000 67%),
+    linear-gradient(180deg, #000 40%, transparent 46%);
+  mask-composite: intersect, add;
+  animation: diver-wave 3.6s ease-in-out infinite alternate;
 }
 
 .regulator {
   position: absolute;
-  top: 9%;
-  left: 39%;
+  top: 37%;
+  left: 22%;
   width: 2px;
   height: 2px;
 }
 
-@keyframes diver-hover {
-  from { translate: 0 0; rotate: -16deg; }
-  to { translate: -10px 22px; rotate: -12deg; }
+@keyframes diver-drift {
+  from { translate: 0 0; rotate: -1.5deg; }
+  to { translate: -14px 18px; rotate: 1.5deg; }
+}
+
+@keyframes diver-kick {
+  from { rotate: -2.6deg; }
+  to { rotate: 2.2deg; }
+}
+
+@keyframes diver-wave {
+  from { rotate: -3deg; }
+  to { rotate: 4deg; }
 }
 
 /* ==========================================================================
@@ -1097,6 +1339,87 @@ p {
 .photo figcaption::before {
   content: "Fig. " counter(figure, decimal-leading-zero);
   color: var(--lume);
+  white-space: nowrap;
+}
+
+/* Photo carousels: a strip that snaps one photo at a time, with the
+   caption, position dots and arrows in a bar underneath. */
+.gallery::after {
+  display: none;
+}
+
+.gallery-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-radius: 3px;
+  box-shadow: 0 30px 60px -30px rgb(0 10 20 / .7), inset 0 0 0 1px rgb(255 255 255 / .12);
+}
+
+.gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-track:focus-visible {
+  outline: 2px solid var(--lume);
+  outline-offset: 3px;
+}
+
+.gallery-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.gallery .gallery-slide img {
+  display: block;
+  aspect-ratio: var(--ratio, 4 / 3);
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-user-drag: none;
+}
+
+.gallery-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: .85rem;
+}
+
+.gallery .gallery-caption {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.gallery-dots {
+  display: flex;
+  gap: .4rem;
+}
+
+.gallery-dots span {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition: background-color 200ms ease, scale 200ms ease;
+}
+
+.gallery-dots span.is-current {
+  background: var(--lume);
+  scale: 1.25;
+}
+
+.gallery-nav {
+  display: flex;
+  gap: .5rem;
+}
+
+.gallery-step {
+  width: 2.6rem;
+  height: 2.6rem;
 }
 
 .dive-plan {
@@ -1147,12 +1470,15 @@ p {
   align-items: start;
 }
 
+/* Glassy blue panels, like the water around them. */
 .resource-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #29464a;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #10272b;
+  background: rgb(6 28 48 / .62);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   box-shadow: 0 40px 80px -40px rgb(0 6 14 / .8);
 }
 
@@ -1162,12 +1488,12 @@ p {
   min-height: 15rem;
   padding: clamp(1.25rem, 3vw, 2rem);
   background:
-    linear-gradient(100deg, #10272b 18%, rgb(16 39 43 / .04)),
-    repeating-linear-gradient(120deg, rgb(183 232 217 / .03) 0 1px, transparent 1px 21px);
+    radial-gradient(120% 90% at 100% 0%, rgb(80 170 230 / .12), transparent 60%),
+    repeating-linear-gradient(120deg, rgb(170 220 255 / .035) 0 1px, transparent 1px 21px);
 }
 
 .map-card .resource-copy {
-  background: #10272b;
+  background: #0b2a44;
 }
 
 .resource-art,
@@ -1183,12 +1509,15 @@ p {
   height: 100%;
   object-fit: cover;
   object-position: center 40%;
+  /* The photo takes the panel's blue, keeping only its light and shade. */
+  mix-blend-mode: luminosity;
+  opacity: .75;
 }
 
 .map-card .resource-copy::after {
   content: "";
   z-index: -1;
-  background: linear-gradient(90deg, #10272b, rgb(16 39 43 / .8) 51%, rgb(16 39 43 / .47));
+  background: linear-gradient(90deg, rgb(7 30 52 / .96), rgb(7 30 52 / .78) 51%, rgb(7 30 52 / .3));
 }
 
 .resource-copy h3 {
@@ -1198,7 +1527,7 @@ p {
 .resource-copy p {
   max-width: 34ch;
   margin-block: .55rem 1.1rem;
-  color: #ccdfdb;
+  color: var(--muted);
 }
 
 .resource-actions {
@@ -1334,6 +1663,9 @@ p {
   display: flex;
   gap: 1.25rem;
   width: max-content;
+  /* Room above the photos for the stars, which stick out past the corner
+     (the strip scrolls sideways, so anything outside it would be cut). */
+  padding: 1.5rem 1rem 0;
 }
 
 .crew li {
@@ -1342,26 +1674,27 @@ p {
   min-width: 0;
 }
 
-/* Qualification stars, one to three, on the corner of each photo. */
+/* Qualification stars, one to three, sitting right on the top-left
+   corner of each photo and overlapping its edge. */
 .stars {
   position: absolute;
-  top: .5rem;
-  left: .5rem;
+  z-index: 1;
+  top: 0;
+  left: 0;
   display: flex;
-  gap: .15rem;
-  padding: .3rem .4rem;
-  border-radius: 999px;
-  background: rgb(2 14 22 / .62);
-  box-shadow: 0 0 0 1px rgb(255 214 90 / .18);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  translate: -30% -46%;
+  pointer-events: none;
 }
 
 .star {
-  width: .9rem;
-  height: .9rem;
+  width: clamp(2rem, 5vw, 2.7rem);
+  height: clamp(2rem, 5vw, 2.7rem);
+  margin-right: -.3rem;
   fill: #ffcf3f;
-  filter: drop-shadow(0 0 3px rgb(255 196 40 / .45));
+  stroke: #8a5a00;
+  stroke-width: .6;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / .55)) drop-shadow(0 0 6px rgb(255 196 40 / .4));
 }
 
 .crew img {
@@ -1446,15 +1779,22 @@ p {
   padding: 0 0 1.3rem 1.45rem;
 }
 
+/* script.js animates the height while an answer opens or closes. */
+.faq-list details.is-moving {
+  overflow: hidden;
+}
+
 /* Join */
 
 .join-panel {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
   overflow: hidden;
-  border: 1px solid #2f5248;
+  border: 1px solid rgb(140 200 240 / .22);
   border-radius: 10px;
-  background: linear-gradient(130deg, #244437, #142f2e);
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgb(90 180 240 / .2), transparent 60%),
+    linear-gradient(130deg, #164468, #0b2840 60%, #081d31);
   box-shadow: 0 50px 100px -50px rgb(0 0 0 / .8);
 }
 
@@ -1483,7 +1823,7 @@ p {
 
 .join-copy p:not(.eyebrow) {
   max-width: 40ch;
-  color: #d3e6df;
+  color: #cfe2ee;
 }
 
 .join-copy .button {
@@ -1524,10 +1864,10 @@ p {
 
 /* The scene is three SVG layers (distant ridges, the wreck, the reef in
    front) that drift apart slightly with the pointer and as the footer
-   scrolls in. Over them a canvas paints the dark water and a diver's torch:
-   the beam, the pool of light where it lands and the silt drifting through
-   it. script.js moves the torch over the wreck first, then out to the
-   ridges behind; on a mouse it follows the pointer. */
+   scrolls in. Over them a canvas dims the water a little (less towards the
+   front) and lifts it back to full brightness in a soft pool wherever the
+   pointer is, with silt sparkling in the light. On touch screens a tap moves
+   the light; until then it drifts slowly over the wreck. */
 
 .seabed-scene {
   position: absolute;
@@ -2076,10 +2416,10 @@ p {
   }
 
   .hero-diver {
-    top: 12vh;
-    right: 4vw;
-    width: 34vw;
-    opacity: .7;
+    top: 7vh;
+    right: -8vw;
+    width: 66vw;
+    opacity: .6;
   }
 
   .hero-content {
