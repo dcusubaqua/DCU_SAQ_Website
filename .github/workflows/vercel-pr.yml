@@ -1,0 +1,112 @@
+name: Merge Vercel pull requests
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Vercel PR number to retry
+        required: true
+        type: number
+
+permissions: {}
+
+concurrency:
+  group: vercel-pr-${{ github.event.pull_request.number || inputs.pull_request }}
+  cancel-in-progress: false
+
+jobs:
+  approve-and-merge:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.sender.id == 35613825 &&
+       github.event.pull_request.user.id == 35613825 &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      checks: read
+      contents: write
+      pull-requests: write
+      statuses: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull_request }}
+      EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Verify the Vercel preview, approve, and merge
+        shell: bash
+        run: |
+          # Only use trusted API metadata. Never check out or run pull request code.
+          [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          pr_api="repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
+          pr=$(gh api "$pr_api")
+          if ! jq -e --arg repo "$GITHUB_REPOSITORY" '
+            .state == "open" and .user.id == 35613825 and .user.login == "vercel[bot]"
+            and .base.ref == "main" and .head.repo.full_name == $repo
+          ' <<< "$pr" >/dev/null; then
+            echo "Only open Vercel bot PRs from this repository into main are eligible."
+            exit 0
+          fi
+
+          head_sha=$(jq -r '.head.sha' <<< "$pr")
+          if [[ -n "$EVENT_HEAD" && "$EVENT_HEAD" != "$head_sha" ]]; then
+            echo "The PR head changed since this run was triggered."
+            exit 0
+          fi
+
+          commits_api="repos/$GITHUB_REPOSITORY/commits/$head_sha"
+          preview_ready=false
+          for attempt in {1..24}; do
+            status=$(gh api "$commits_api/status" --jq '
+              [.statuses[] | select(.context == "Vercel"
+                and ((.target_url // "") | startswith("https://vercel.com/dcu-sac/dcu_saq_website/")))]
+              | first | .state // "pending"
+            ')
+            case "$status" in
+              failure|error)
+                echo "::error::Vercel preview failed for $head_sha."
+                exit 1
+                ;;
+              success)
+                if gh api "$commits_api/check-runs?app_id=8329&check_name=Vercel%20Preview%20Comments" |
+                  jq -e --arg sha "$head_sha" '
+                    any(.check_runs[]; .app.id == 8329 and .app.slug == "vercel"
+                      and .head_sha == $sha and .conclusion == "success")
+                  ' >/dev/null; then
+                  preview_ready=true
+                  break
+                fi
+                ;;
+            esac
+            sleep 10
+          done
+          if [[ "$preview_ready" != true ]]; then
+            echo "::error::Vercel preview did not succeed in time."
+            exit 1
+          fi
+
+          pr=$(gh api "$pr_api")
+          if ! jq -e --arg sha "$head_sha" '
+            .state == "open" and .base.ref == "main" and .head.sha == $sha
+          ' <<< "$pr" >/dev/null; then
+            echo "The PR changed while the preview was building."
+            exit 0
+          fi
+          if [[ $(jq -r '.mergeable' <<< "$pr") == false ]]; then
+            echo "::error::Resolve the merge conflict before retrying."
+            exit 1
+          fi
+          if [[ $(jq -r '.draft' <<< "$pr") == true ]]; then
+            gh pr ready "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+          fi
+
+          gh api --method POST "$pr_api/reviews" \
+            -f event=APPROVE -f commit_id="$head_sha" \
+            -f body="Vercel preview passed for this commit. Approved by the repository workflow." \
+            --jq '{state, commit_id}'
+          gh api --method PUT "$pr_api/merge" \
+            -f merge_method=squash -f sha="$head_sha" \
+            --jq '{merged, sha, message}'

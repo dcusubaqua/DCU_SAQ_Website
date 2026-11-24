@@ -1,358 +1,63 @@
-const committeeMembers = [
-  {
-    role: "Captain",
-    name: "Committee Member",
-    note: "Leads the club and keeps the season moving.",
-    image: "assets/headshots/captain.png",
-  },
-  {
-    role: "Secretary",
-    name: "Committee Member",
-    note: "Handles comms, admin, and club coordination.",
-    image: "assets/headshots/secretary.png",
-  },
-  {
-    role: "Treasurer",
-    name: "Committee Member",
-    note: "Manages budgets, payments, and planning.",
-    image: "assets/headshots/treasurer.png",
-  },
-  {
-    role: "Equipment Officer",
-    name: "Committee Member",
-    note: "Looks after club kit and gear logistics.",
-    image: "assets/headshots/equipment.png",
-  },
-  {
-    role: "Training Officer",
-    name: "Committee Member",
-    note: "Supports progression from pool training to qualification.",
-    image: "assets/headshots/training.png",
-  },
-  {
-    role: "Diving Officer",
-    name: "Committee Member",
-    note: "Oversees diving operations and trip readiness.",
-    image: "assets/headshots/diving-officer.png",
-  },
-  {
-    role: "Underwater Hockey Captain",
-    name: "Committee Member",
-    note: "Drives hockey sessions and team development.",
-    image: "assets/headshots/hockey-captain.png",
-  },
-  {
-    role: "Events Officer",
-    name: "Committee Member",
-    note: "Plans socials, nights out, and special club moments.",
-    image: "assets/headshots/events.png",
-  },
-  {
-    role: "First Year Rep",
-    name: "Vacant",
-    note: "This role is open for a new member to step in.",
-    image: "assets/headshots/first-year.png",
-  },
-];
-
-const committeeGrid = document.querySelector("#committee-grid");
 const menuToggle = document.querySelector(".menu-toggle");
-const siteNav = document.querySelector(".site-nav");
-const siteHeader = document.querySelector(".site-header");
-const depthGauge = document.querySelector(".depth-gauge");
-const depthGaugeTicks = document.querySelector("#depth-gauge-ticks");
-const depthGaugeValue = document.querySelector("#depth-gauge-value");
-const constantBubbleStream = document.querySelector("#constant-bubble-stream");
-const bubbleStream = document.querySelector("#bubble-stream");
-const diverOverlay = document.querySelector(".diver-overlay");
+const siteNav = document.querySelector("#site-nav");
+const mobileLayout = window.matchMedia("(max-width: 850px)");
 
-const randomStarCount = () => Math.floor(Math.random() * 3) + 1;
+menuToggle.hidden = false;
 
-const committeeLoopCopies = 3;
-const repeatedCommitteeMembers = Array.from({ length: committeeLoopCopies }, () => committeeMembers).flat();
+function closeMenu(restoreFocus = false) {
+  menuToggle.setAttribute("aria-expanded", "false");
 
-const renderCommittee = () => {
-  if (!committeeGrid) return;
-
-  committeeGrid.setAttribute("aria-label", "Committee carousel");
-
-  committeeGrid.innerHTML = repeatedCommitteeMembers
-    .map((member) => {
-      const starCount = randomStarCount();
-
-      return `
-        <article class="committee-card">
-          <div class="committee-photo">
-            <div class="committee-stars" aria-hidden="true">
-              ${Array.from(
-                { length: starCount },
-                () => '<img class="committee-star" src="assets/ui/star.png" alt="" loading="lazy" />'
-              ).join("")}
-            </div>
-            <img class="committee-headshot" src="${member.image}" alt="${member.name} headshot" loading="lazy" />
-          </div>
-          <div class="committee-body">
-            <p class="committee-role">${member.role}</p>
-            <h3 class="committee-name">${member.name}</h3>
-            <p class="committee-note">${member.note}</p>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
-
-  committeeGrid.querySelectorAll(".committee-headshot").forEach((image) => {
-    image.addEventListener("error", () => {
-      image.hidden = true;
-    });
-  });
-};
-
-const setupCommitteeCarousel = () => {
-  if (!committeeGrid) return;
-
-  let animationFrame = null;
-  let autoScrollRemainder = 0;
-  const speed = 0.28;
-
-  const getLoopWidth = () => committeeGrid.scrollWidth / committeeLoopCopies;
-
-  const normalizeScrollPosition = () => {
-    const loopWidth = getLoopWidth();
-    if (!loopWidth) return;
-
-    if (committeeGrid.scrollLeft < loopWidth * 0.5) {
-      committeeGrid.scrollLeft += loopWidth;
-    } else if (committeeGrid.scrollLeft > loopWidth * 1.5) {
-      committeeGrid.scrollLeft -= loopWidth;
-    }
-  };
-
-  const tick = () => {
-    normalizeScrollPosition();
-
-    if (committeeGrid.scrollWidth > committeeGrid.clientWidth) {
-      autoScrollRemainder += speed;
-      const moveBy =
-        autoScrollRemainder > 0 ? Math.floor(autoScrollRemainder) : Math.ceil(autoScrollRemainder);
-
-      if (moveBy !== 0) {
-        committeeGrid.scrollLeft += moveBy;
-        autoScrollRemainder -= moveBy;
-      }
-    }
-
-    animationFrame = window.requestAnimationFrame(tick);
-  };
-
-  const centerCarousel = () => {
-    const loopWidth = getLoopWidth();
-    if (!loopWidth) return;
-    committeeGrid.scrollLeft = loopWidth;
-  };
-  window.addEventListener("resize", centerCarousel);
-
-  centerCarousel();
-
-  animationFrame = window.requestAnimationFrame(tick);
-};
-
-const setupMenu = () => {
-  if (!menuToggle || !siteNav) return;
-
-  menuToggle.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("is-open");
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
-  });
-
-  siteNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      siteNav.classList.remove("is-open");
-      menuToggle.setAttribute("aria-expanded", "false");
-    });
-  });
-};
-
-const setupHeaderVisibility = () => {
-  if (!siteHeader) return;
-
-  let lastScrollY = window.scrollY;
-
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    const delta = currentScrollY - lastScrollY;
-    lastScrollY = currentScrollY;
-
-    if (currentScrollY <= 24) {
-      siteHeader.classList.remove("is-hidden");
-      return;
-    }
-
-    if (Math.abs(delta) < 4) return;
-
-    siteHeader.classList.toggle("is-hidden", delta > 0);
-  };
-
-  window.addEventListener("scroll", handleScroll, { passive: true });
-};
-
-const setupDepthGauge = () => {
-  if (!depthGauge || !depthGaugeTicks || !depthGaugeValue) return;
-
-  const tickCount = 32;
-  const maxDepthMeters = 42;
-  let currentDepth = 0;
-  let currentTilt = -80;
-  let targetDepth = 0;
-  let targetTilt = -80;
-  let animationFrame = null;
-
-  depthGaugeTicks.innerHTML = Array.from({ length: tickCount }, (_, index) => {
-    const ratio = index / (tickCount - 1);
-    const angle = ratio * 360;
-    const isMajor = index % 4 === 0;
-
-    return `<span class="depth-gauge-tick${isMajor ? " is-major" : ""}" style="--tick-angle: ${angle}deg"></span>`;
-  }).join("");
-
-  const tickElements = Array.from(depthGaugeTicks.children);
-
-  const syncToScroll = () => {
-    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
-    const rayVisibility = Math.max(0.03, 1 - progress * 1.35);
-    const depthDarkness = Math.min(1, progress * 1.18);
-
-    targetDepth = progress * maxDepthMeters;
-    targetTilt = -80 + progress * 160;
-    document.documentElement.style.setProperty("--ray-visibility", rayVisibility.toFixed(3));
-    document.documentElement.style.setProperty("--depth-darkness", depthDarkness.toFixed(3));
-  };
-
-  const updateTicks = (depth) => {
-    const activeCount = Math.round((depth / maxDepthMeters) * (tickCount - 1));
-
-    tickElements.forEach((tick, index) => {
-      tick.classList.toggle("is-active", index <= activeCount);
-    });
-  };
-
-  const animate = () => {
-    currentDepth += (targetDepth - currentDepth) * 0.18;
-    currentTilt += (targetTilt - currentTilt) * 0.2;
-    const diverProgress = Math.min(1, Math.max(0, (currentDepth - 10) / 4));
-    const diverYProgress = Math.min(1, Math.max(0, (currentDepth - 10) / (maxDepthMeters - 10)));
-
-    depthGaugeTicks.style.setProperty("--gauge-tilt", `${currentTilt.toFixed(2)}deg`);
-    depthGaugeValue.textContent = `${Math.round(currentDepth)}`;
-    updateTicks(currentDepth);
-    if (diverOverlay) {
-      document.documentElement.style.setProperty("--diver-progress", diverProgress.toFixed(3));
-      document.documentElement.style.setProperty("--diver-y-progress", diverYProgress.toFixed(3));
-    }
-
-    animationFrame = window.requestAnimationFrame(animate);
-  };
-
-  syncToScroll();
-
-  window.addEventListener("scroll", syncToScroll, { passive: true });
-  window.addEventListener("resize", syncToScroll);
-
-  animationFrame = window.requestAnimationFrame(animate);
-};
-
-const setupScrollBubbles = () => {
-  if (!bubbleStream && !constantBubbleStream) return;
-
-  let lastScrollY = window.scrollY;
-  let lastSpawnTime = 0;
-
-  const spawnConstantBubble = () => {
-    if (!constantBubbleStream) return;
-
-    const bubble = document.createElement("span");
-    const size = 7 + Math.random() * 10;
-    const duration = 5.8 + Math.random() * 2.2;
-    const drift = -22 + Math.random() * 44;
-    const startX = 8 + Math.random() * 84;
-
-    bubble.className = "constant-bubble";
-    bubble.style.left = `${startX}%`;
-    bubble.style.setProperty("--bubble-size", `${size.toFixed(1)}px`);
-    bubble.style.setProperty("--bubble-duration", `${duration.toFixed(2)}s`);
-    bubble.style.setProperty("--bubble-drift", `${drift.toFixed(1)}px`);
-
-    bubble.addEventListener("animationend", () => {
-      bubble.remove();
-    });
-
-    constantBubbleStream.appendChild(bubble);
-  };
-
-  const spawnScrollBubble = (strength = 1) => {
-    if (!bubbleStream) return;
-
-    const bubble = document.createElement("span");
-    const sizeBias = Math.random();
-    const size =
-      sizeBias < 0.45
-        ? 4 + Math.random() * 7
-        : sizeBias < 0.82
-          ? 10 + Math.random() * 11
-          : 21 + Math.random() * 15 * Math.min(strength, 1.7);
-    const duration = 1.25 + Math.random() * 0.95;
-    const drift = -58 + Math.random() * 116;
-    const startX = 4 + Math.random() * 92;
-
-    bubble.className = "scroll-bubble";
-    bubble.style.left = `${startX}%`;
-    bubble.style.setProperty("--bubble-size", `${size.toFixed(1)}px`);
-    bubble.style.setProperty("--bubble-duration", `${duration.toFixed(2)}s`);
-    bubble.style.setProperty("--bubble-drift", `${drift.toFixed(1)}px`);
-
-    bubble.addEventListener("animationend", () => {
-      bubble.remove();
-    });
-
-    bubbleStream.appendChild(bubble);
-  };
-
-  if (constantBubbleStream) {
-    for (let index = 0; index < 5; index += 1) {
-      window.setTimeout(spawnConstantBubble, index * 280);
-    }
-
-    window.setInterval(() => {
-      spawnConstantBubble();
-    }, 850);
+  if (restoreFocus) {
+    menuToggle.focus();
   }
+}
 
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    const delta = currentScrollY - lastScrollY;
-    lastScrollY = currentScrollY;
+menuToggle.addEventListener("click", () => {
+  const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+  menuToggle.setAttribute("aria-expanded", String(!isOpen));
+});
 
-    if (delta <= 2) return;
+siteNav.addEventListener("click", (event) => {
+  if (event.target.closest("a") && mobileLayout.matches) {
+    closeMenu();
+  }
+});
 
-    const now = performance.now();
-    if (now - lastSpawnTime < 45) return;
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
+    closeMenu(true);
+  }
+});
 
-    lastSpawnTime = now;
-    const strength = Math.min(delta / 42, 1.5);
-    const burstCount = Math.max(2, Math.min(6, Math.round(2 + strength * 3.2)));
+mobileLayout.addEventListener("change", () => closeMenu());
 
-    for (let index = 0; index < burstCount; index += 1) {
-      spawnScrollBubble(strength);
+document.querySelectorAll("[data-load-embed]").forEach((button) => {
+  const panel = document.getElementById(button.getAttribute("aria-controls"));
+  button.hidden = false;
+  button.setAttribute("aria-expanded", "false");
+
+  button.addEventListener("click", () => {
+    const show = panel.hidden;
+    const label = panel.id === "map-embed" ? "map" : "calendar";
+
+    if (show && !panel.firstElementChild) {
+      const frame = document.createElement("iframe");
+      frame.src = panel.dataset.embedSrc;
+      frame.title = panel.dataset.embedTitle;
+      panel.append(frame);
     }
-  };
 
-  window.addEventListener("scroll", handleScroll, { passive: true });
-};
+    panel.hidden = !show;
+    button.setAttribute("aria-expanded", String(show));
+    button.textContent = `${show ? "Hide" : "Show"} ${label}`;
+  });
+});
 
-renderCommittee();
-setupMenu();
-setupHeaderVisibility();
-setupCommitteeCarousel();
-setupDepthGauge();
-setupScrollBubbles();
+const trailer = document.querySelector(".trailer");
+const video = trailer.querySelector("video");
+
+trailer.addEventListener("toggle", () => {
+  if (!trailer.open) {
+    video.pause();
+  }
+});

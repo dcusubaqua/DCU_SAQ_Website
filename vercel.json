@@ -1,5 +1,35 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/"
+    },
+    {
+      "source": "/new-to-diving",
+      "destination": "/#new-to-diving"
+    },
+    {
+      "source": "/underwater-hockey",
+      "destination": "/#underwater-hockey"
+    },
+    {
+      "source": "/calendar",
+      "destination": "/#calendar"
+    },
+    {
+      "source": "/club-info/dive-map",
+      "destination": "/#dive-map"
+    },
+    {
+      "source": "/club-info/sign-up",
+      "destination": "/#sign-up"
+    },
+    {
+      "source": "/club-info/request-reimbursement",
+      "destination": "https://sites.google.com/view/dcusac/club-info/request-reimbursement"
+    }
+  ]
 }

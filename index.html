@@ -1,358 +1,305 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-IE">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="DCU Sub-Aqua Club modern homepage with diving, underwater hockey, training, events, and committee information."
-    />
-    <title>DCU Sub-Aqua Club</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08191d" />
+    <meta name="description" content="Learn to scuba dive, play underwater hockey and explore the Irish coast with DCU Sub-Aqua Club." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="DCU Sub-Aqua Club" />
+    <meta property="og:description" content="Scuba diving, snorkelling and underwater hockey at Dublin City University." />
+    <meta property="og:url" content="https://www.dcusubaquaclub.com/" />
+    <meta property="og:image" content="https://www.dcusubaquaclub.com/assets/club/hero.webp" />
+    <meta property="og:image:alt" content="A scuba diver swims through blue water above the seabed." />
+    <title>DCU Sub-Aqua Club | Diving &amp; Underwater Hockey</title>
+    <link rel="icon" href="assets/club/logo.webp" type="image/webp" />
+    <link rel="canonical" href="https://www.dcusubaquaclub.com/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..750&amp;family=Plus+Jakarta+Sans:wght@400..750&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <!-- Vercel Web Analytics -->
+    <script>
+      window.va = window.va || function () {
+        (window.vaq = window.vaq || []).push(arguments);
+      };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <!-- Vercel Speed Insights -->
-    <script defer src="/speed-insights.js"></script>
+    <script>
+      window.si = window.si || function () {
+        (window.siq = window.siq || []).push(arguments);
+      };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+    <script src="script.js" defer></script>
   </head>
-  <body>
-    <aside class="depth-gauge" aria-hidden="true">
-      <div class="depth-gauge-shell">
-        <div class="depth-gauge-glow"></div>
-        <div class="depth-gauge-ring"></div>
-        <div class="depth-gauge-arc"></div>
-        <div class="depth-gauge-ticks" id="depth-gauge-ticks"></div>
-        <div class="depth-gauge-readout">
-          <span class="depth-gauge-label">Depth</span>
-          <strong class="depth-gauge-value" id="depth-gauge-value">0</strong>
-          <span class="depth-gauge-unit">meters</span>
-        </div>
-      </div>
-    </aside>
-    <div class="swim-scene" aria-hidden="true">
-      <div class="bubble-field"></div>
-      <div class="bubble-stream bubble-stream-constant" id="constant-bubble-stream"></div>
-      <div class="bubble-stream bubble-stream-scroll" id="bubble-stream"></div>
-      <img class="fish fish-shark" src="assets/scene/shark.png" alt="" />
-      <img class="fish fish-brass" src="assets/scene/brass.png" alt="" />
-      <img class="fish fish-orange" src="assets/scene/orange-fish.png" alt="" />
-      <div class="shark shark-one"></div>
-      <div class="shark shark-two"></div>
-      <div class="shark shark-three"></div>
-    </div>
-    <div class="site-shell">
-      <header class="site-header">
-        <a class="brand" href="#home" aria-label="DCU Sub-Aqua Club home">
-          <span class="brand-mark">
-            <img src="assets/logos/club-logo.png" alt="DCU Sub-Aqua Club logo" />
-          </span>
-          <span class="brand-copy">
-            <strong>DCU Sub-Aqua Club</strong>
-            <small>Dive. Train. Explore.</small>
-          </span>
+  <body id="home">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#home">
+          <span class="brand-mark"><img src="assets/club/logo.webp" width="128" height="85" alt="" /></span>
+          <span>DCU Sub-Aqua Club</span>
         </a>
-
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-          <span></span>
-          <span></span>
-          <span></span>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" hidden>
+          Menu <span aria-hidden="true"></span>
         </button>
-
         <nav class="site-nav" id="site-nav" aria-label="Main navigation">
-          <a href="#home">Home</a>
-          <a href="#new-to-diving">New To Diving?</a>
-          <a href="#underwater-hockey">Underwater Hockey</a>
+          <a href="#new-to-diving">Diving</a>
+          <a href="#underwater-hockey">Hockey</a>
           <a href="#calendar">Calendar</a>
-          <a href="#dive-map">Dive Map</a>
-          <a class="nav-signup" href="#sign-up">Sign Up</a>
+          <a href="#dive-map">Dive map</a>
+          <a href="#committee">Committee</a>
+          <a class="button button-small" href="#sign-up">Join the club <span aria-hidden="true">↗</span></a>
         </nav>
-      </header>
+      </div>
+    </header>
 
-      <main>
-        <section class="hero depth-surface" id="home">
-          <div class="hero-overlay"></div>
-
+    <main id="main-content" tabindex="-1">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-art" aria-hidden="true">
+          <img src="assets/club/hero.webp" srcset="assets/club/hero-small.webp 660w, assets/club/hero.webp 1200w" sizes="(max-width: 700px) 100vw, 70vw" width="1200" height="900" alt="" fetchpriority="high" />
+        </div>
+        <div class="wrap hero-inner">
           <div class="hero-content">
-            <p class="eyebrow">DCU Clubs & Socs</p>
-            <h1>Explore the blue planet.</h1>
-            <p class="hero-copy">
-              On a planet that is covered by the seas, why limit yourself to just the remaining 30%?
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#sign-up">Join the Club</a>
-              <a class="button button-secondary" href="#new-to-diving">Start Diving</a>
-            </div>
-            <div class="hero-stats" aria-label="Club highlights">
-              <article>
-                <strong>2001</strong>
-                <span>Club founded</span>
-              </article>
-              <article>
-                <strong>CMAS</strong>
-                <span>Training pathway</span>
-              </article>
-              <article>
-                <strong>Weekly</strong>
-                <span>Pool sessions</span>
-              </article>
+            <p class="eyebrow"><span class="signal" aria-hidden="true"></span>Dublin City University</p>
+            <h1 id="hero-title">Explore the<br /> <em>blue planet.</em></h1>
+            <p class="hero-copy">Learn to scuba dive, play underwater hockey and explore the Irish coast with DCU Sub-Aqua Club.</p>
+            <div class="actions">
+              <a class="button" href="#sign-up">Join the club <span aria-hidden="true">↗</span></a>
+              <a class="button button-outline" href="#new-to-diving">New to diving? <span aria-hidden="true">↓</span></a>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="section intro depth-shallow">
-          <div class="section-heading">
-            <p class="eyebrow">About the Club</p>
-            <h2>Diving, hockey, and a genuinely welcoming crew.</h2>
-          </div>
-          <div class="intro-grid">
-            <article class="panel intro-card">
-              <span class="chip">Since 2001</span>
-              <h3>Who we are</h3>
-              <p>
-                DCU Sub-Aqua Club has been diving since 2001 and has grown into a social, adventurous group
-                of students who train together, travel together, and spend as much time in the water as
-                possible.
-              </p>
-              <p class="intro-note">Equal parts sport, training, and social chaos in the best way.</p>
-            </article>
-            <article class="panel intro-card intro-card-emphasis">
-              <span class="chip">Training Pathway</span>
-              <h3>How we train</h3>
-              <p>
-                Our diving programme follows Diving Ireland and CMAS standards, with pool-based skill
-                development leading into open-water progression when members are ready.
-              </p>
-              <div class="intro-points" aria-label="Training highlights">
-                <span class="intro-point">Pool-first progression</span>
-                <span class="intro-point">Qualified instruction</span>
-                <span class="intro-point">Standards-led development</span>
+      <div class="facts-band">
+        <dl class="wrap facts">
+          <div><dt>Founded at DCU</dt><dd>2001</dd></div>
+          <div><dt>Training standard</dt><dd>CMAS</dd></div>
+          <div><dt>Governing body</dt><dd>Diving Ireland</dd></div>
+        </dl>
+      </div>
+
+      <div class="wrap section about">
+        <div>
+          <p class="eyebrow">About the club</p>
+          <h2>A club for life<br class="wide-break" /> in the water.</h2>
+        </div>
+        <p>We’re a student-led diving club for beginners, qualified divers and anyone curious about life below the surface. We train in the pool and explore dive sites around Dublin and across Ireland. You can also join us for snorkelling, underwater hockey and club socials.</p>
+      </div>
+
+      <section class="wrap section story" id="new-to-diving" aria-labelledby="diving-title">
+        <figure class="story-photo">
+          <img src="assets/club/open-water.webp" width="800" height="600" alt="Blue water above a rocky seabed" loading="lazy" decoding="async" />
+          <figcaption>From the club’s dive gallery</figcaption>
+        </figure>
+        <div class="story-copy">
+          <p class="eyebrow">Scuba diving &amp; snorkelling</p>
+          <h2 id="diving-title">Your first dive starts in the pool.</h2>
+          <p>You can join as a complete beginner. Train with qualified Diving Ireland instructors and work towards your CMAS 1★ Trainee Diver qualification.</p>
+          <ol class="training-steps">
+            <li><div><strong>Learn the theory</strong><span>Cover the basics of equipment, communication and dive planning.</span></div></li>
+            <li><div><strong>Build your skills</strong><span>Practise snorkelling and scuba skills with instructors.</span></div></li>
+            <li><div><strong>Head into open water</strong><span>Progress to supervised sea dives when you’re ready.</span></div></li>
+          </ol>
+          <a class="text-link" href="#calendar">Find a training session <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="wrap section story story-reverse" id="underwater-hockey" aria-labelledby="hockey-title">
+        <figure class="story-photo">
+          <img src="assets/club/hockey.webp" width="800" height="450" alt="Underwater hockey players in action on the bottom of a swimming pool" loading="lazy" decoding="async" />
+          <figcaption>From the club’s underwater hockey gallery</figcaption>
+        </figure>
+        <div class="story-copy">
+          <p class="eyebrow">Underwater hockey</p>
+          <h2 id="hockey-title">Hockey at the bottom of the pool.</h2>
+          <p>Two teams use short sticks to move a weighted puck along the pool floor. It’s a fast, mixed-team sport and a good way to build confidence in the water.</p>
+          <p>Beginners are welcome. The club provides sticks, gloves and caps. Get in touch before your first session to check what to bring.</p>
+          <a class="text-link" href="#contact">Ask about hockey <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="wrap section resources" aria-labelledby="resources-title">
+        <h2 id="resources-title">Plan your next session.</h2>
+        <div class="resource-grid">
+          <article class="resource-card" id="calendar">
+            <div class="resource-copy">
+              <span class="resource-icon calendar-icon" aria-hidden="true"></span>
+              <h3>Club calendar</h3>
+              <p>Check what’s coming up, from pool training and club socials to weekend dives.</p>
+              <div class="resource-actions">
+                <button class="button button-small button-outline" type="button" data-load-embed aria-controls="calendar-embed" hidden>Show calendar</button>
+                <a class="text-link" href="https://sites.google.com/view/dcusac/calendar">Open calendar <span aria-hidden="true">↗</span></a>
               </div>
-            </article>
-            <article class="panel intro-card">
-              <span class="chip">Why It Sticks</span>
-              <h3>What makes it fun</h3>
-              <p>
-                There is room here for complete beginners, certified divers, and competitive underwater
-                hockey players. The club works best when everyone brings energy, curiosity, and a little
-                appetite for the unknown.
-              </p>
-              <p class="intro-note">You can show up new, nervous, competitive, social, or all four at once.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section split-section depth-shallow" id="new-to-diving">
-          <div class="section-heading">
-            <p class="eyebrow">New To Diving?</p>
-            <h2>Start in the pool, build confidence, and work toward open water.</h2>
-          </div>
-          <div class="split-grid">
-            <article class="panel feature-card">
-              <span class="chip">Beginner-friendly</span>
-              <h3>No prior experience needed</h3>
-              <p>
-                If you are curious about scuba but have never tried it, the club gives you a safe on-ramp.
-                We begin with pool sessions, equipment basics, and buoyancy drills before moving toward
-                deeper skills.
-              </p>
-            </article>
-            <article class="panel checklist-card">
-              <h3>What to expect</h3>
-              <ul class="checklist">
-                <li>Intro sessions focused on safety and comfort in the water</li>
-                <li>Qualified instruction with a clear progression path</li>
-                <li>Pool training before any open-water diving</li>
-                <li>Support from experienced members and buddies</li>
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section class="section split-section depth-mid" id="underwater-hockey">
-          <div class="section-heading">
-            <p class="eyebrow">Underwater Hockey</p>
-            <h2>Fast, chaotic, addictive, and much more tactical than people expect.</h2>
-          </div>
-          <div class="split-grid">
-            <article class="panel">
-              <h3>A second way into the water</h3>
-              <p>
-                Underwater hockey is one of the club’s standout activities. It is a team sport played on the
-                bottom of the pool with short sticks, a puck, fins, mask, and snorkel. Sessions are intense,
-                social, and surprisingly technical.
-              </p>
-            </article>
-            <article class="panel">
-              <h3>Why members love it</h3>
-              <p>
-                It builds breath control, awareness, movement underwater, and teamwork. It is also one of the
-                quickest ways for new members to get involved, meet people, and start showing up regularly.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section depth-deep committee-section" id="committee">
-          <div class="section-heading">
-            <p class="eyebrow">Committee 2025-2026</p>
-            <h2>The people running the season.</h2>
-          </div>
-          <div class="committee-grid" id="committee-grid"></div>
-        </section>
-
-        <section class="section info-band depth-mid" id="calendar">
-          <div class="section-heading">
-            <p class="eyebrow">Calendar</p>
-            <h2>Training nights, weekend dives, and club events in one place.</h2>
-          </div>
-          <div class="calendar-layout">
-            <article class="panel info-card">
-              <p>
-                See training nights, weekend dives, and upcoming club events without leaving the site. The
-                live calendar beside this panel is embedded directly from the current DCU Sub-Aqua Club
-                calendar page.
-              </p>
-              <a class="text-link" href="https://www.dcusubaquaclub.com/calendar" target="_blank" rel="noreferrer">
-                Open the full calendar page
-              </a>
-            </article>
-            <div class="panel calendar-embed-card">
-              <iframe
-                class="calendar-embed"
-                src="https://www.google.com/calendar/embed?color=%2392e1c0&embed_style=WyJhdDplbWI6c3QiLCIjZTBlMGUwIiwiI2VkZWRlZCIsIiM0MTg0ZjMiLCJyb2JvdG8iLCIjNjM2MzYzIiw1MDAsIiNmZmYiXQo&eopt=2&mode=month&showCalendars=1&showPrint=0&showTitle=0&showTz=1&src=4f1adbd5d45ae0b16334c31351d7c284238a7241f1e8aae44dcfd33daa49e986@group.calendar.google.com"
-                title="DCU Sub-Aqua Club Google Calendar"
-                loading="lazy"
-              ></iframe>
             </div>
-          </div>
-        </section>
-
-        <section class="section info-band depth-deep" id="dive-map">
-          <div class="section-heading">
-            <p class="eyebrow">Dive Map</p>
-            <h2>From pool sessions to coastal weekends.</h2>
-          </div>
-          <div class="calendar-layout">
-            <article class="panel info-card">
-              <p>
-                Explore some of the club’s favourite dive sites around Ireland directly from the live map.
-                It’s the same embedded map currently used on the DCU Sub-Aqua Club dive map page.
-              </p>
-              <a class="text-link" href="https://www.dcusubaquaclub.com/club-info/dive-map" target="_blank" rel="noreferrer">
-                Open the full dive map page
-              </a>
-            </article>
-            <div class="panel map-embed-card">
-              <iframe
-                class="map-embed"
-                src="https://www.google.com/maps/d/embed?mid=1oQCF7Q-XolJqMvRHibrGAma2ssmPlQjU"
-                title="DCU Sub-Aqua Club Dive Map"
-                loading="lazy"
-              ></iframe>
+            <div class="embed" id="calendar-embed" data-embed-title="DCU Sub-Aqua Club calendar" data-embed-src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;ctz=Europe%2FDublin&amp;src=4f1adbd5d45ae0b16334c31351d7c284238a7241f1e8aae44dcfd33daa49e986%40group.calendar.google.com" hidden></div>
+          </article>
+          <article class="resource-card map-card" id="dive-map">
+            <div class="resource-copy">
+              <img class="resource-art" src="assets/club/coast.webp" width="693" height="520" alt="" loading="lazy" decoding="async" />
+              <span class="resource-icon pin-icon" aria-hidden="true"></span>
+              <h3>Dive map</h3>
+              <p>Explore the club’s map of dive sites around the Irish coast.</p>
+              <div class="resource-actions">
+                <button class="button button-small button-outline" type="button" data-load-embed aria-controls="map-embed" hidden>Show map</button>
+                <a class="text-link" href="https://sites.google.com/view/dcusac/club-info/dive-map">Open dive map <span aria-hidden="true">↗</span></a>
+              </div>
             </div>
-          </div>
-        </section>
+            <div class="embed" id="map-embed" data-embed-title="DCU Sub-Aqua Club dive sites" data-embed-src="https://www.google.com/maps/d/embed?mid=1oQCF7Q-XolJqMvRHibrGAma2ssmPlQjU" hidden></div>
+          </article>
+        </div>
+        <details class="trailer">
+          <summary>Watch the club dive video</summary>
+          <video controls playsinline preload="none" poster="assets/club/trailer-poster.webp" width="480" height="360" aria-label="DCU Sub-Aqua Club dive video">
+            <source src="trailer.mp4" type="video/mp4" />
+            <a href="trailer.mp4">Open the club dive video</a>
+          </video>
+        </details>
+      </section>
 
-        <section class="section faq-section depth-abyss" id="faq">
-          <div class="section-heading">
-            <p class="eyebrow">FAQ</p>
-            <h2>Common questions, answered clearly.</h2>
-          </div>
-          <div class="faq-accordion">
-            <details class="faq-item panel">
-              <summary>Do I need my own gear?</summary>
-              <div class="faq-answer">
-                <p>
-                  Not at the beginning. New members can start with the basics and learn what equipment matters
-                  before investing in personal kit.
-                </p>
-              </div>
-            </details>
-            <details class="faq-item panel">
-              <summary>Can complete beginners join?</summary>
-              <div class="faq-answer">
-                <p>
-                  Yes. The club is built to support students who are totally new to diving as well as members
-                  who already have certifications or hockey experience.
-                </p>
-              </div>
-            </details>
-            <details class="faq-item panel">
-              <summary>Is it just scuba?</summary>
-              <div class="faq-answer">
-                <p>
-                  No. Underwater hockey, pool sessions, social events, and trips are all part of the experience,
-                  so there are multiple ways to get involved.
-                </p>
-              </div>
-            </details>
-          </div>
-        </section>
+      <section class="wrap section committee" id="committee" aria-labelledby="committee-title">
+        <p class="eyebrow">2026–27 committee</p>
+        <h2 id="committee-title">Meet the team.</h2>
+        <ul class="committee-grid">
+          <li class="committee-card">
+            <img src="assets/club/committee/alizee-leleu.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+            <div><h3>Alizee Leleu</h3><p>President, Diving &amp; Training Officer</p></div>
+          </li>
+          <li class="committee-card">
+            <img src="assets/club/committee/naoise-dart.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+            <div><h3>Naoise d’Art</h3><p>Chairperson</p></div>
+          </li>
+          <li class="committee-card">
+            <img src="assets/club/committee/devyani-jambhule.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+            <div><h3>Devyani Jambhule</h3><p>Treasurer</p></div>
+          </li>
+          <li class="committee-card">
+            <img src="assets/club/committee/alana-guckianwalton.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+            <div><h3>Alana Guckianwalton</h3><p>Vice Chairperson &amp; Secretary</p></div>
+          </li>
+          <li class="committee-card">
+            <img src="assets/club/committee/paul-stratan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+            <div><h3>Paul Stratan</h3><p>Underwater Sports &amp; Assistant Diving Officer</p></div>
+          </li>
+        </ul>
+        <details class="committee-more">
+          <summary>View all committee members</summary>
+          <ul class="committee-grid">
+            <li class="committee-card">
+              <img src="assets/club/committee/conor-pursun.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Conor Pursun</h3><p>Snorkel &amp; Equipment Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/nat-kolesnyk.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Nat Kolesnyk</h3><p>Boat Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/konrad-kunkel.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Konrad Kunkel</h3><p>Webmaster</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/elias-castellano-szczedrin.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Elias Castellano Szczedrin</h3><p>Events Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/rachel-burke.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Rachel Burke</h3><p>Safety Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/valentina-arismendiarteta.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Valentina Arismendiarteta</h3><p>Public Relations Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/mikey-sheridan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Mikey Sheridan</h3><p>First Year Rep</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/grace-murphy.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Grace Murphy</h3><p>First Year Rep</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/cara-lau.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Cara Lau</h3><p>Assistant Training Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/louise-gillet-de-chalonge.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Louise Gillet de Chalonge</h3><p>Assistant Treasurer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/matt-fitzpatrick.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Matt Fitzpatrick</h3><p>Assistant Equipment Officer</p></div>
+            </li>
+            <li class="committee-card">
+              <img src="assets/club/committee/phil-smyth.webp" width="300" height="300" alt="" loading="lazy" decoding="async" />
+              <div><h3>Phil Smyth</h3><p>Assistant Boat Officer</p></div>
+            </li>
+          </ul>
+        </details>
+      </section>
 
-        <section class="section sign-up-section contact-section depth-floor" id="sign-up">
-          <div id="contact"></div>
-          <div class="section-heading">
-            <p class="eyebrow">Join & Contact</p>
-            <h2>Ready to join the club or ask a question?</h2>
-          </div>
-          <div class="contact-grid">
-            <article class="cta-panel">
-              <h3>Sign up through DCU</h3>
-              <p>
-                Membership and club registration can be handled through DCU Clubs & Socs. Use the official
-                link below to sign up, then keep an eye on club channels for session info and announcements.
-              </p>
-              <div class="hero-actions">
-                <a
-                  class="button button-primary"
-                  href="https://www.dcuclubsandsocs.ie/society/subaqua"
-                  target="_blank"
-                  rel="noreferrer"
-                  >Sign Up Through DCU</a
-                >
-                <a class="button button-secondary" href="https://www.dcusubaquaclub.com/calendar" target="_blank" rel="noreferrer"
-                  >View Club Calendar</a
-                >
-              </div>
-            </article>
-            <article class="panel">
-              <h3>Get in touch</h3>
-              <p>Questions, collabs, or first-timer nerves? Reach out to the committee here.</p>
-              <p class="contact-detail">Example: <a class="text-link" href="mailto:subaqua@example.com">subaqua@example.com</a></p>
-              <form class="contact-form">
-                <label>
-                  Name
-                  <input type="text" name="name" placeholder="Your name" />
-                </label>
-                <label>
-                  Email
-                  <input type="email" name="email" placeholder="you@example.com" />
-                </label>
-                <label>
-                  Message
-                  <textarea name="message" rows="5" placeholder="Ask us anything"></textarea>
-                </label>
-                <button class="button button-primary" type="submit">Send Message</button>
-              </form>
-            </article>
-          </div>
-          <div class="ocean-floor" aria-hidden="true">
-            <span class="reef reef-left"></span>
-            <span class="reef reef-center"></span>
-            <span class="reef reef-right"></span>
-            <span class="rock rock-left"></span>
-            <span class="rock rock-right"></span>
-            <span class="seagrass grass-left"></span>
-            <span class="seagrass grass-center"></span>
-            <span class="seagrass grass-right"></span>
-          </div>
-        </section>
-      </main>
-    </div>
+      <section class="wrap section faq" id="faq" aria-labelledby="faq-title">
+        <div>
+          <p class="eyebrow">Before you join</p>
+          <h2 id="faq-title">Your questions, answered.</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Can I join if I’ve never dived?</summary>
+            <p>Yes. Beginners need a basic ability to swim. The club teaches the theory and practical skills you’ll need before you dive in the sea.</p>
+          </details>
+          <details>
+            <summary>Do I need to buy equipment?</summary>
+            <p>Ask the training team what’s needed for your first session before buying kit. What you’ll need depends on whether you’re diving, snorkelling or playing hockey.</p>
+          </details>
+          <details>
+            <summary>Can I snorkel without learning to scuba dive?</summary>
+            <p>Yes. You can take part in snorkelling on its own, or come along for underwater hockey and socials.</p>
+          </details>
+          <details>
+            <summary>What if I already have a diving qualification?</summary>
+            <p>Get in touch with the club about your qualification. If you trained with another organisation, the club may ask you to complete an equivalency assessment before joining dives.</p>
+          </details>
+        </div>
+      </section>
 
-    <script src="script.js"></script>
+      <section class="wrap section join" id="sign-up" aria-labelledby="join-title">
+        <div class="join-panel">
+          <img src="assets/club/club-outing.webp" width="740" height="490" alt="" loading="lazy" decoding="async" />
+          <div class="join-copy">
+            <p class="eyebrow">Membership</p>
+            <h2 id="join-title">Get in the water with us.</h2>
+            <p>Sign in to DCU Clubs &amp; Socs with your DCU account and find Sub Aqua Club to join.</p>
+            <a class="button" href="https://dcuclubsandsocs.ie/club/sub-aqua">Join through DCU <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="contact" id="contact">
+          <div>
+            <h3>Have a question?</h3>
+            <p>Ask the committee about membership, training or your first session.</p>
+          </div>
+          <div class="actions">
+            <a class="button button-outline" href="mailto:DCUSubAquaClub@gmail.com">Email the club <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfaBE-psJpXyAn4UMsQmy1IJpQ2NKkzcFEiXy3AeHKLNQ8C9Q/viewform">Contact form <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <a class="brand" href="#home">
+          <span class="brand-mark"><img src="assets/club/logo.webp" width="128" height="85" alt="" loading="lazy" /></span>
+          <span>DCU Sub-Aqua Club</span>
+        </a>
+        <nav aria-label="Footer navigation">
+          <a href="https://www.instagram.com/dcusubaqua/">Instagram <span aria-hidden="true">↗</span></a>
+          <a href="#faq">FAQs</a>
+          <a href="#home">Back to top <span aria-hidden="true">↑</span></a>
+        </nav>
+      </div>
+    </footer>
   </body>
 </html>
