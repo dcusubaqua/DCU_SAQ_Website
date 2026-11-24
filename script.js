@@ -178,9 +178,9 @@
   }));
 
   const SCHOOLS = [
-    { at: 0.02, parallax: 0.9, offset: -0.2, count: 22, len: [11, 16], speed: 30, dir: 1, w: 240, h: 70, rgb: "4 46 58", alpha: 0.5, glint: true },
-    { at: 0.08, parallax: 0.55, offset: 0.22, count: 36, len: [7, 10], speed: 16, dir: -1, w: 320, h: 90, rgb: "6 54 68", alpha: 0.34, glint: true },
-    { at: 0.17, parallax: 0.8, offset: -0.08, count: 28, len: [12, 17], speed: 38, dir: -1, w: 280, h: 80, rgb: "3 38 54", alpha: 0.5, glint: true },
+    { at: 0.02, parallax: 0.9, offset: -0.2, count: 22, len: [11, 16], speed: 30, dir: 1, w: 240, h: 70, rgb: "4 46 58", alpha: 0.5 },
+    { at: 0.08, parallax: 0.55, offset: 0.22, count: 36, len: [7, 10], speed: 16, dir: -1, w: 320, h: 90, rgb: "6 54 68", alpha: 0.34 },
+    { at: 0.17, parallax: 0.8, offset: -0.08, count: 28, len: [12, 17], speed: 38, dir: -1, w: 280, h: 80, rgb: "3 38 54", alpha: 0.5 },
     { at: 0.25, parallax: 0.5, offset: 0.26, count: 46, len: [7, 11], speed: 20, dir: 1, w: 380, h: 110, rgb: "4 36 54", alpha: 0.3 },
     { at: 0.45, parallax: 0.85, offset: 0.22, count: 24, len: [14, 20], speed: 44, dir: -1, w: 300, h: 80, rgb: "2 24 42", alpha: 0.45 },
     { at: 0.985, parallax: 0.95, offset: 0.02, count: 14, len: [9, 13], speed: 18, dir: 1, w: 200, h: 60, rgb: "96 140 146", alpha: 0.28 },
@@ -288,6 +288,7 @@
     dpr = Math.min(window.devicePixelRatio || 1, vw < 720 ? 1.5 : 2);
     canvas.width = Math.round(vw * dpr);
     canvas.height = Math.round(oceanH * dpr);
+    sizeSchoolLayer();
 
     anchors = stopLinks.map((link) => {
       const target = document.getElementById(link.hash.slice(1));
@@ -299,21 +300,13 @@
       link.querySelector("[data-stop-depth]").textContent = `${Math.round(depthAt(anchors[i]))} m`;
     });
 
-    document.querySelectorAll("[data-depth-at]").forEach((label) => {
-      const section = label.closest("section");
-      label.textContent = `${Math.round(depthAt(section ? arrival(section) : 0))} m`;
-    });
-
-    document.querySelectorAll("[data-max-depth]").forEach((label) => {
-      label.textContent = `${MAX_DEPTH} m`;
-    });
-
     creatures.forEach((creature) => {
       creature.w = creature.el.offsetWidth;
       creature.h = creature.el.offsetHeight;
     });
 
     if (!motes.length || Math.abs(motes.length - (vw * oceanH) / 9000) > 30) seedMotes();
+    measureTorch();
     lastState.depth = -1;
     lastState.stop = -1;
   }
@@ -511,18 +504,39 @@
     }
   }
 
-  function fish(x, y, len, dir, wag) {
-    const d = dir * len;
-    const w = wag * len * 0.09;
-    ctx.beginPath();
-    ctx.moveTo(x + d * 0.5, y);
-    ctx.bezierCurveTo(x + d * 0.3, y - len * 0.2, x - d * 0.12, y - len * 0.17, x - d * 0.32, y - len * 0.03 + w * 0.4);
-    ctx.lineTo(x - d * 0.53, y - len * 0.18 + w);
-    ctx.lineTo(x - d * 0.45, y + w * 0.6);
-    ctx.lineTo(x - d * 0.53, y + len * 0.18 + w);
-    ctx.lineTo(x - d * 0.32, y + len * 0.03 + w * 0.4);
-    ctx.bezierCurveTo(x - d * 0.12, y + len * 0.17, x + d * 0.3, y + len * 0.2, x + d * 0.5, y);
-    ctx.fill();
+  // Each school is drawn at full strength into its own layer and then laid
+  // over the water at the school's opacity, so fish that cross each other
+  // don't make darker patches.
+  const schoolLayer = document.createElement("canvas");
+  const sctx = schoolLayer.getContext("2d");
+  const SCHOOL_PAD = 44;
+
+  function sizeSchoolLayer() {
+    const w = Math.max(...SCHOOLS.map((s) => s.w)) + SCHOOL_PAD * 2;
+    const h = Math.max(...SCHOOLS.map((s) => s.h)) + SCHOOL_PAD * 2;
+    schoolLayer.width = Math.ceil(w * dpr);
+    schoolLayer.height = Math.ceil(h * dpr);
+  }
+
+  // A small fusiform fish facing +x, centred on the origin: pointed snout,
+  // deepest just behind the head, a narrow tail stalk and a forked tail.
+  function fish(g, len, wag) {
+    const h = len * 0.19;
+    const tail = wag * len * 0.1;
+    g.beginPath();
+    g.moveTo(len * 0.5, 0);
+    g.bezierCurveTo(len * 0.44, -h * 0.85, len * 0.16, -h * 1.08, -len * 0.14, -h * 0.62);
+    g.quadraticCurveTo(-len * 0.28, -h * 0.3, -len * 0.35, tail * 0.45 - h * 0.14);
+    g.lineTo(-len * 0.52, tail - h * 1.05);
+    g.lineTo(-len * 0.43, tail);
+    g.lineTo(-len * 0.52, tail + h * 1.05);
+    g.lineTo(-len * 0.35, tail * 0.45 + h * 0.14);
+    g.quadraticCurveTo(-len * 0.28, h * 0.3, -len * 0.14, h * 0.62);
+    g.bezierCurveTo(len * 0.16, h * 1.08, len * 0.44, h * 0.85, len * 0.5, 0);
+    g.moveTo(len * 0.1, -h * 0.98);
+    g.lineTo(-len * 0.04, -h * 1.55);
+    g.lineTo(-len * 0.1, -h * 0.8);
+    g.fill();
   }
 
   function drawSchools(t, scrollY) {
@@ -532,21 +546,35 @@
       const span = vw + s.w * 2;
       const travelled = (s.start + t * s.speed) % span;
       const cx = s.dir > 0 ? travelled - s.w : vw + s.w - travelled;
-      const colour = `rgb(${s.rgb})`;
-      ctx.fillStyle = colour;
-      ctx.globalAlpha = s.alpha;
+      const bw = s.w + SCHOOL_PAD * 2;
+      const bh = s.h + SCHOOL_PAD * 2;
+      const left = cx - bw / 2;
+      const top = cy - bh / 2;
+
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sctx.clearRect(0, 0, bw, bh);
+      sctx.fillStyle = `rgb(${s.rgb})`;
+      const vx = s.speed * s.dir;
       for (const m of s.members) {
-        const mx = cx + m.ox + Math.sin(t * 0.7 + m.phase) * 10;
-        const my = cy + m.oy + Math.cos(t * 0.55 + m.phase * 1.3) * 7 + Math.sin(mx * 0.012 + t * 1.2) * 5;
-        fish(mx, my, m.len, s.dir, Math.sin(t * 9 * m.beat + m.phase));
-        if (s.glint && Math.sin(t * 1.3 + m.phase * 7) > 0.985) {
-          ctx.fillStyle = "rgb(225 248 250)";
-          ctx.globalAlpha = 0.7;
-          ctx.fill();
-          ctx.fillStyle = colour;
-          ctx.globalAlpha = s.alpha;
-        }
+        const sway = t * 0.7 + m.phase;
+        const heave = t * 0.55 + m.phase * 1.3;
+        const mx = cx + m.ox + Math.sin(sway) * 10;
+        const wave = mx * 0.012 + t * 1.2;
+        const my = cy + m.oy + Math.cos(heave) * 7 + Math.sin(wave) * 5;
+        // Point each fish the way it is actually moving.
+        const dx = vx + Math.cos(sway) * 7;
+        const dy = -Math.sin(heave) * 3.85 + Math.cos(wave) * 5 * (1.2 + 0.012 * dx);
+        const pitch = clamp(Math.atan2(dy, Math.abs(dx)), -0.45, 0.45);
+        sctx.save();
+        sctx.translate(mx - left, my - top);
+        sctx.scale(s.dir, 1);
+        sctx.rotate(pitch);
+        fish(sctx, m.len, Math.sin(t * 9 * m.beat + m.phase));
+        sctx.restore();
       }
+
+      ctx.globalAlpha = s.alpha;
+      ctx.drawImage(schoolLayer, 0, 0, bw * dpr, bh * dpr, left, top, bw, bh);
     }
     ctx.globalAlpha = 1;
   }
@@ -704,6 +732,282 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Seabed torch                                                        */
+  /* ------------------------------------------------------------------ */
+
+  // The footer scene is lit by one torch. A canvas over the three seabed
+  // layers paints the dark water with a pool of light cut out of it, the
+  // beam coming down from above, and silt that sparkles where the light
+  // catches it. The torch sweeps the wreck first, then the ridges behind
+  // it; the further away it lands, the wider, flatter and dimmer the pool.
+
+  const seabed = document.querySelector(".seabed");
+  const seabedLayers = document.querySelector(".seabed-layers");
+  const torchCanvas = document.querySelector(".torch-light");
+  const tctx = torchCanvas ? torchCanvas.getContext("2d") : null;
+
+  // Stops as fractions of the seabed picture, with how long to linger.
+  // far: 0 on the wreck, 1 on the ridges behind it.
+  const TORCH_PATH = [
+    { x: 0.8, y: 0.44, far: 0, hold: 3.2 }, // the bow and the anchor
+    { x: 0.55, y: 0.6, far: 0, hold: 2.6 }, // the hole in the hull
+    { x: 0.27, y: 0.64, far: 0, hold: 2.8 }, // the stern and its sea fan
+    { x: 0.13, y: 0.5, far: 1, hold: 3.2 }, // out to the rock arch behind
+    { x: 0.47, y: 0.32, far: 0.3, hold: 2 }, // over the bridge
+    { x: 0.94, y: 0.5, far: 1, hold: 3.2 }, // and the pinnacle on the right
+  ];
+  const DARK = [1, 6, 10];
+  const AMBIENT = 0.92; // how dark the water is away from the light
+  // Torch switching on: [seconds, brightness], held until the next step.
+  const FLICKER = [[0, 0], [0.1, 0.7], [0.16, 0.08], [0.3, 0.9], [0.36, 0.25], [0.52, 1]];
+
+  const torch = {
+    w: 0,
+    h: 0,
+    scale: 1,
+    pic: { x: 0, y: 0, w: 1, h: 1 }, // the picture's box inside the scene
+    spot: null,
+    aim: { x: 0, y: 0 },
+    stop: 0,
+    timer: 0,
+    held: -Infinity, // when the pointer or a tap last aimed the torch
+    lit: -1, // time the torch was switched on, -1 until the scene is seen
+    visible: false,
+    drawn: false,
+    pointer: { x: 0.5, y: 0.5 },
+    silt: [],
+  };
+
+  // The beam: a soft-edged wedge, narrow at the torch and wide where it
+  // lands, painted once into a small image and stretched into place.
+  const beamSprite = (() => {
+    const w = 64;
+    const h = 256;
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    const g = c.getContext("2d");
+    const img = g.createImageData(w, h);
+    for (let y = 0; y < h; y += 1) {
+      const v = y / (h - 1);
+      const half = 0.07 + 0.93 * v;
+      const along = smoothstep(0, 0.3, v) * (1 - 0.4 * v);
+      for (let x = 0; x < w; x += 1) {
+        const u = Math.abs((x + 0.5) / w - 0.5) * 2;
+        const across = 1 - smoothstep(0.35, 1, u / half);
+        const i = (y * w + x) * 4;
+        img.data[i] = 214;
+        img.data[i + 1] = 240;
+        img.data[i + 2] = 232;
+        img.data[i + 3] = Math.round(255 * along * across * across);
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return c;
+  })();
+
+  // A stop on the tour, in scene pixels. On narrow screens the picture is
+  // wider than the scene, so stops off to the side are pulled back into view.
+  const tourStop = (i) => {
+    const stop = TORCH_PATH[i];
+    const x = torch.pic.x + stop.x * torch.pic.w;
+    return { x: clamp(x, torch.w * 0.1, torch.w * 0.9), y: torch.pic.y + stop.y * torch.pic.h, far: stop.far };
+  };
+
+  function measureTorch() {
+    if (!tctx) return;
+    const scene = seabed.getBoundingClientRect();
+    const pic = seabedLayers.getBoundingClientRect();
+    torch.w = seabed.clientWidth;
+    torch.h = seabed.clientHeight;
+    torch.scale = Math.min(dpr, 1.25);
+    torchCanvas.width = Math.round(torch.w * torch.scale);
+    torchCanvas.height = Math.round(torch.h * torch.scale);
+    torch.pic = { x: pic.left - scene.left, y: pic.top - scene.top, w: pic.width, h: pic.height };
+    if (!torch.spot) torch.spot = tourStop(0);
+    torch.aim = tourStop(torch.stop);
+    if (!torch.silt.length) {
+      for (let i = 0; i < 90; i += 1) {
+        torch.silt.push({ x: Math.random(), y: rand(0.25, 1), r: rand(0.6, 1.8), drift: rand(-0.004, 0.004), sink: rand(0.002, 0.008), phase: Math.random() * TAU });
+      }
+    }
+    torch.drawn = false;
+  }
+
+  function torchBrightness(now) {
+    if (torch.lit < 0) return 0;
+    const s = (now - torch.lit) / 1000;
+    let value = 0;
+    for (const [at, v] of FLICKER) if (s >= at) value = v;
+    return value;
+  }
+
+  function updateTorch(now, dt, still) {
+    if (!tctx || !torch.visible || !torch.spot) return;
+    if (still && torch.drawn) return;
+    const t = now / 1000;
+    if (torch.lit < 0) torch.lit = still ? now - 1000 : now;
+
+    // Where to aim: the pointer while it's in use, otherwise the tour.
+    const pic = torch.pic;
+    const aimed = now - torch.held < 4000;
+    if (!aimed && !still) {
+      torch.timer += dt;
+      if (torch.timer > TORCH_PATH[torch.stop].hold + 2.4) {
+        torch.timer = 0;
+        torch.stop = (torch.stop + 1) % TORCH_PATH.length;
+        torch.aim = tourStop(torch.stop);
+      }
+    }
+    const ease = still ? 1 : 1 - Math.exp(-dt * (aimed ? 5 : 0.9));
+    torch.spot.x += (torch.aim.x - torch.spot.x) * ease;
+    torch.spot.y += (torch.aim.y - torch.spot.y) * ease;
+    torch.spot.far += (torch.aim.far - torch.spot.far) * ease;
+    // A hand-held torch never sits perfectly still.
+    const wobble = still ? 0 : 1;
+    const px = torch.spot.x + (Math.sin(t * 1.3) * 3 + Math.sin(t * 3.1) * 1.5) * wobble;
+    const py = torch.spot.y + (Math.cos(t * 1.1) * 2 + Math.sin(t * 2.7) * 1.2) * wobble;
+
+    // On the ridges behind the wreck the light has further to go: the pool
+    // spreads wider, flattens out and loses strength.
+    const far = torch.spot.far;
+    const rx = pic.w * (0.13 + 0.07 * far);
+    const ry = rx * (0.62 - 0.14 * far);
+    const power = torchBrightness(now) * (1 - 0.32 * far) * (0.96 + 0.04 * Math.sin(t * 1.7));
+
+    const g = tctx;
+    g.setTransform(torch.scale, 0, 0, torch.scale, 0, 0);
+    g.clearRect(0, 0, torch.w, torch.h);
+
+    // Dark water with the pool of light cut out of it.
+    const dark = (alpha) => `rgb(${DARK[0]} ${DARK[1]} ${DARK[2]} / ${(AMBIENT - (AMBIENT - alpha) * power).toFixed(3)})`;
+    g.save();
+    g.translate(px, py);
+    g.scale(rx, ry);
+    const pool = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+    pool.addColorStop(0, dark(0.02 + 0.12 * far));
+    pool.addColorStop(0.45, dark(0.08 + 0.16 * far));
+    pool.addColorStop(0.75, dark(0.42 + 0.14 * far));
+    pool.addColorStop(1, dark(AMBIENT));
+    g.fillStyle = pool;
+    const reach = Math.max(torch.w / rx, torch.h / ry) * 2 + 2;
+    g.fillRect(-reach, -reach, reach * 2, reach * 2);
+    g.restore();
+
+    // The beam, from above and to the right, following the pointer a little.
+    const sx = torch.w * (0.86 + (torch.pointer.x - 0.5) * 0.08);
+    const sy = -torch.h * 0.25;
+    const dx = px - sx;
+    const dy = py - sy;
+    const len = Math.hypot(dx, dy);
+    const endW = rx * 1.7;
+    g.save();
+    g.globalAlpha = 0.2 * power;
+    g.translate(sx, sy);
+    g.rotate(Math.atan2(dy, dx) - Math.PI / 2);
+    g.drawImage(beamSprite, -endW / 2, 0, endW, len);
+    g.restore();
+
+    // The glow where it lands, and a hotter middle.
+    g.save();
+    g.translate(px, py);
+    g.scale(rx, ry);
+    const glow = g.createRadialGradient(0, 0, 0, 0, 0, 1.05);
+    glow.addColorStop(0, `rgb(230 248 238 / ${(0.13 * power).toFixed(3)})`);
+    glow.addColorStop(0.35, `rgb(214 240 232 / ${(0.07 * power).toFixed(3)})`);
+    glow.addColorStop(1, "rgb(214 240 232 / 0)");
+    g.fillStyle = glow;
+    g.beginPath();
+    g.arc(0, 0, 1.05, 0, TAU);
+    g.fill();
+    g.restore();
+
+    // Silt: barely there in the dark, bright inside the beam.
+    const ux = dx / len;
+    const uy = dy / len;
+    g.fillStyle = "rgb(225 245 238)";
+    for (const p of torch.silt) {
+      if (!still) {
+        p.x = (p.x + p.drift * dt + 1) % 1;
+        p.y += p.sink * dt;
+        if (p.y > 1) p.y = 0.25;
+      }
+      const qx = p.x * torch.w + Math.sin(t * 0.6 + p.phase) * 6;
+      const qy = p.y * torch.h + Math.cos(t * 0.5 + p.phase) * 4;
+      const ox = qx - sx;
+      const oy = qy - sy;
+      const along = (ox * ux + oy * uy) / len;
+      const side = Math.abs(ox * uy - oy * ux);
+      const half = (endW / 2) * (0.07 + 0.93 * clamp(along, 0, 1));
+      const inBeam = along > 0.15 && along < 1.05 ? 1 - smoothstep(0.4, 1, side / half) : 0;
+      const ex = (qx - px) / rx;
+      const ey = (qy - py) / ry;
+      const inPool = 1 - smoothstep(0.3, 1, Math.hypot(ex, ey));
+      const a = (0.04 + 0.55 * Math.max(inBeam, inPool)) * power;
+      if (a < 0.015) continue;
+      g.globalAlpha = a;
+      g.fillRect(qx, qy, p.r, p.r);
+    }
+    g.globalAlpha = 1;
+    torch.drawn = true;
+  }
+
+  function aimTorch(clientX, clientY) {
+    const scene = seabed.getBoundingClientRect();
+    const x = clientX - scene.left;
+    const y = clientY - scene.top;
+    if (x < 0 || x > scene.width || y < 0 || y > scene.height) return false;
+    // Keep the light on the scene rather than up on the footer text.
+    const aimY = Math.max(y, torch.pic.y + torch.pic.h * 0.22);
+    // High in the picture means past the wreck, on the ridges behind it.
+    const far = clamp((0.56 - (aimY - torch.pic.y) / torch.pic.h) / 0.2, 0, 1);
+    torch.aim = { x, y: aimY, far };
+    torch.held = performance.now();
+    return true;
+  }
+
+  if (tctx) {
+    new IntersectionObserver(
+      ([entry]) => {
+        torch.visible = entry.isIntersecting;
+      },
+      { threshold: 0.2 },
+    ).observe(seabed);
+
+    seabed.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse") aimTorch(event.clientX, event.clientY);
+    });
+
+    if (finePointer.matches) {
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          torch.pointer.x = event.clientX / vw;
+          torch.pointer.y = event.clientY / vh;
+          if (torch.visible) aimTorch(event.clientX, event.clientY);
+        },
+        { passive: true },
+      );
+    }
+  }
+
+  // The three seabed layers drift apart a little with the pointer, and
+  // settle as the footer scrolls up into view.
+  const layerState = { px: NaN, py: NaN, rise: NaN };
+  function updateLayers(still) {
+    if (!seabedLayers || !torch.visible) return;
+    const top = seabed.getBoundingClientRect().top;
+    const rise = still ? 0 : Math.round(clamp(top / vh, 0, 1) * 100) / 100;
+    const px = still ? 0 : Math.round((torch.pointer.x - 0.5) * 200) / 100;
+    const py = still ? 0 : Math.round((torch.pointer.y - 0.5) * 200) / 100;
+    if (rise === layerState.rise && px === layerState.px && py === layerState.py) return;
+    Object.assign(layerState, { rise, px, py });
+    seabedLayers.style.setProperty("--rise", rise);
+    seabedLayers.style.setProperty("--px", px);
+    seabedLayers.style.setProperty("--py", py);
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Loop                                                                */
   /* ------------------------------------------------------------------ */
 
@@ -731,6 +1035,8 @@
     drawSchools(t, scrollY);
     drawTentacles(t, scrollY, progress);
     if (!still) drawBubbles(t, dt, scrollDelta, progress);
+    updateLayers(still);
+    updateTorch(now, dt, still);
 
     firstFrame = false;
     requestAnimationFrame(frame);
