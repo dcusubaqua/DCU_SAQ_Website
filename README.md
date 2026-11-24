@@ -18,24 +18,13 @@ python3 -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
-## Committee headshots
+## Updating club content
 
-Place committee images in `assets/headshots/` using these filenames:
+The committee roster is in the `#committee` section of `index.html`. Portraits live in
+`assets/club/committee/`. Update the committee year, names, roles, and photos together at the start of a new term.
 
-- `captain.jpg`
-- `secretary.jpg`
-- `treasurer.jpg`
-- `equipment.jpg`
-- `training.jpg`
-- `diving-officer.jpg`
-- `hockey-captain.jpg`
-- `events.jpg`
-- `first-year.jpg`
+Club photos, committee details and contact form come from the [original club site](https://www.dcusubaquaclub.com/).
+The diving and hockey pages on that site describe the club's training and activities. The club email and
+Instagram are listed by [DCU Sport](https://www.dcu.ie/dcusport/sports-clubs).
 
-PNG, JPG, or WEBP also work if you update the matching path in `script.js`.
-
-Update the matching committee names and notes in `script.js` once you have the final roster.
-
-## Trailer
-
-The homepage hero uses `trailer.mp4` from the repo root.
+The dive video is `trailer.mp4`. It loads when a visitor plays it.
