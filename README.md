@@ -2,12 +2,11 @@
 
 Modern dark-theme rebuild for the DCU Sub-Aqua Club website.
 
-## GitHub Pages
+## Vercel deployment
 
-This repo is configured to deploy automatically to GitHub Pages with GitHub Actions.
+Production site: [DCU Sub-Aqua Club](https://dcusaqwebsite.vercel.app/).
 
-- Push to `main` to trigger a deployment.
-- The published site URL will be `https://loyyd.github.io/dcusubaqua/` unless the repository Pages settings use a custom domain.
+The Vercel project deploys from `main`. The site is static HTML, CSS, and JavaScript. Vercel serves the repository root directly without an install or build step.
 
 ## Local preview
 
