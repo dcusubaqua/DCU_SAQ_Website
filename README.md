@@ -23,7 +23,7 @@ Then visit `http://localhost:8000`.
 The committee roster is in the `#committee` section of `index.html`. Portraits live in
 `assets/club/committee/`. Update the committee year, names, roles, and photos together at the start of a new term.
 
-Club photos, committee details and contact form come from the [original club site](https://www.dcusubaquaclub.com/).
+Club photos, committee details and contact form come from the [original club site](https://sites.google.com/view/dcusac/).
 The diving and hockey pages on that site describe the club's training and activities. The club email and
 Instagram are listed by [DCU Sport](https://www.dcu.ie/dcusport/sports-clubs).
 
