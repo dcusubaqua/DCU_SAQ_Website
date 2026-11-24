@@ -9,6 +9,7 @@
 (() => {
   "use strict";
 
+  const START_DEPTH = 3; // metres shown at the top: the page opens underwater
   const MAX_DEPTH = 60; // metres shown at the bottom of the page
   const STOP_SPACING = 24; // degrees between stops on the bezel (matches styles.css)
   const SCALE_STEP = 5; // degrees of the inner depth scale per metre
@@ -25,6 +26,7 @@
   const stopLinks = stopItems.map((item) => item.querySelector("a"));
   const bezel = document.querySelector(".dial-bezel");
   const scale = document.querySelector(".dial-scale");
+  const dialGlass = document.querySelector(".dial-glass");
   const miniTicks = document.querySelector(".mini-ticks");
   const odometer = document.querySelector("[data-odometer]");
   const depthInt = document.querySelector("[data-depth-int]");
@@ -92,7 +94,7 @@
   }
   miniTicks.parentNode.append(svg("path", { d: "M-4.5 -49.5h9l-4.5 8z", class: "mini-index" }));
 
-  // Odometer reels: tens, ones, tenths.
+  // Odometer reels: tens and ones, in whole metres.
   function reel(blankZero) {
     const windowEl = document.createElement("span");
     const strip = document.createElement("span");
@@ -108,18 +110,15 @@
     return { windowEl, strip, pos: 0, drawn: -1 };
   }
 
-  const reels = [reel(true), reel(false), reel(false)];
-  const point = document.createElement("span");
-  point.className = "reel-dot";
-  point.textContent = ".";
+  const reels = [reel(true), reel(false)];
   odometer.textContent = "";
-  odometer.append(reels[0].windowEl, reels[1].windowEl, point, reels[2].windowEl);
+  odometer.append(reels[0].windowEl, reels[1].windowEl);
 
   // Each reel rolls the short way round to its digit, so the readout turns
   // like a mechanical counter while moving and settles on whole digits.
   function setOdometer(depth, dt, instant) {
-    const tenths = Math.round(clamp(depth, 0, 99.9) * 10);
-    const targets = [Math.floor(tenths / 100) % 10, Math.floor(tenths / 10) % 10, tenths % 10];
+    const metres = Math.round(clamp(depth, 0, 99));
+    const targets = [Math.floor(metres / 10) % 10, metres % 10];
     const ease = instant ? 1 : 1 - Math.exp(-dt * 16);
     reels.forEach((r, i) => {
       const delta = ((((targets[i] - r.pos) % 10) + 15) % 10) - 5;
@@ -261,7 +260,7 @@
   let motes = [];
   let bubbles = [];
 
-  const depthAt = (scrollY) => clamp(scrollY / maxScroll, 0, 1) * MAX_DEPTH;
+  const depthAt = (scrollY) => START_DEPTH + clamp(scrollY / maxScroll, 0, 1) * (MAX_DEPTH - START_DEPTH);
   const pageTop = (element) => element.getBoundingClientRect().top + window.scrollY;
   // Where the browser lands when you jump to a section, so a stop's depth
   // label matches the gauge after clicking it.
@@ -333,7 +332,7 @@
   /* Console                                                             */
   /* ------------------------------------------------------------------ */
 
-  let shownDepth = 0;
+  let shownDepth = START_DEPTH;
   let shownStop = 0;
   let previewStop = -1;
   let activeStop = -1;
@@ -391,7 +390,7 @@
         const away = Math.abs(i - shownStop) * STOP_SPACING;
         const opacity = clamp(1 - (away - 12) / 72, 0, 1);
         item.style.opacity = opacity.toFixed(3);
-        item.style.pointerEvents = opacity < 0.25 ? "none" : "";
+        stopLinks[i].style.pointerEvents = opacity < 0.25 ? "none" : "";
       });
     }
 
@@ -408,9 +407,9 @@
 
   function resetConsoleLayout() {
     stopList.style.transform = "";
-    stopItems.forEach((item) => {
+    stopItems.forEach((item, i) => {
       item.style.opacity = "";
-      item.style.pointerEvents = "";
+      stopLinks[i].style.pointerEvents = "";
     });
     scale.removeAttribute("transform");
     miniTicks.removeAttribute("transform");
@@ -428,7 +427,12 @@
   toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
 
   stopList.addEventListener("click", (event) => {
-    if (event.target.closest("a") && !wideLayout.matches) setOpen(false);
+    if (event.target.closest("a")) setOpen(false);
+  });
+
+  // On the desktop gauge a mouse opens it by hovering; a tap opens it too.
+  dialGlass.addEventListener("pointerdown", (event) => {
+    if (wideLayout.matches && event.pointerType !== "mouse") setOpen(!consoleNav.hasAttribute("data-open"));
   });
 
   document.addEventListener("keydown", (event) => {
@@ -623,7 +627,7 @@
     const rect = regulator && regulator.getBoundingClientRect();
     const fromDiver = rect && rect.top > -20 && rect.top < vh;
     const count = Math.round(rand(9, 15));
-    const x = fromDiver ? rect.left : rand(vw * 0.12, Math.max(vw * 0.2, vw * 0.8 - (wideLayout.matches ? vw * 0.2 : 0)));
+    const x = fromDiver ? rect.left : rand(vw * 0.12, vw * 0.82);
     const y = fromDiver ? rect.top : oceanH + 24;
     for (let i = 0; i < count; i += 1) {
       bubbles.push({
@@ -764,6 +768,216 @@
       panel.firstElementChild.focus();
     });
   });
+
+  /* ------------------------------------------------------------------ */
+  /* Committee carousel                                                  */
+  /* ------------------------------------------------------------------ */
+
+  // The full committee sits in one strip that drifts slowly to the left and
+  // loops forever. One copy of the list is cloned on each side, and the
+  // scroll position is quietly moved by one copy's width whenever it strays
+  // too far, so there is never an end. Anyone can take over at any moment by
+  // scrolling, swiping, dragging, using the arrow keys or the buttons; the
+  // drift pauses while the pointer or focus is on it and resumes afterwards.
+  function setUpCrew(track) {
+    const list = track.querySelector(".crew");
+    const originals = [...list.children];
+    const nav = document.querySelector("[data-crew-nav]");
+    if (originals.length < 2) return;
+
+    const DRIFT = 26; // pixels per second
+    const RESUME_AFTER = 5000; // ms of calm after someone scrolls or clicks
+    const SETTLE = 250; // ms without scroll events before the loop is re-centred
+
+    const cloneSet = () =>
+      originals.map((item) => {
+        const copy = item.cloneNode(true);
+        copy.setAttribute("aria-hidden", "true");
+        copy.inert = true;
+        return copy;
+      });
+    list.prepend(...cloneSet());
+    list.append(...cloneSet());
+    const allImages = list.querySelectorAll("img");
+
+    let loop = 0; // width of one full copy of the committee
+    let step = 0; // width of one card plus the gap
+    let pos = 0; // where the strip should be, in fractional pixels
+    let lastSet = 0; // what scrollLeft read back after we last set it
+    let velocity = 0;
+    let lastUserScroll = -Infinity;
+    let pausedUntil = 0;
+    let hovering = false;
+    let focusInside = false;
+    let touching = false;
+    let drag = null;
+    let visible = false;
+    let rafId = 0;
+    let lastTick = 0;
+
+    function measureCrew() {
+      const first = list.children[0];
+      const oldLoop = loop;
+      loop = originals[0].offsetLeft - first.offsetLeft;
+      step = list.children[1].offsetLeft - first.offsetLeft;
+      if (loop === oldLoop) return;
+      pos = oldLoop ? (pos / oldLoop) * loop : loop;
+      place(true);
+    }
+
+    function wrapPos() {
+      if (pos >= loop * 1.5) pos -= loop;
+      else if (pos < loop * 0.5) pos += loop;
+    }
+
+    function place(force) {
+      if (!force && Math.abs(pos - track.scrollLeft) < 0.25) return;
+      track.scrollLeft = pos;
+      lastSet = track.scrollLeft;
+    }
+
+    const drifting = (now) =>
+      visible &&
+      !reducedMotion.matches &&
+      !hovering &&
+      !focusInside &&
+      !touching &&
+      !drag &&
+      now >= pausedUntil;
+
+    function tick(now) {
+      rafId = 0;
+      const dt = Math.min(0.05, (now - lastTick) / 1000);
+      lastTick = now;
+      const target = drifting(now) ? DRIFT : 0;
+      velocity += (target - velocity) * Math.min(1, dt * 2.5);
+      if (Math.abs(velocity) < 0.05) velocity = 0;
+
+      if (!touching && !drag && now - lastUserScroll > SETTLE) {
+        pos += velocity * dt;
+        wrapPos();
+        place(false);
+      }
+      if (visible) rafId = requestAnimationFrame(tick);
+    }
+
+    function wake() {
+      if (!rafId && visible) {
+        lastTick = performance.now();
+        rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    // Someone took over: stop dead (no leftover drift) and wait a while.
+    function holdFor(ms) {
+      velocity = 0;
+      pausedUntil = Math.max(pausedUntil, performance.now() + ms);
+    }
+
+    track.addEventListener(
+      "scroll",
+      () => {
+        if (Math.abs(track.scrollLeft - lastSet) <= 1.5) return;
+        pos = track.scrollLeft;
+        lastSet = pos;
+        lastUserScroll = performance.now();
+        holdFor(RESUME_AFTER);
+        wake();
+      },
+      { passive: true },
+    );
+
+    const reel = track.closest(".crew-reel");
+    const section = track.closest(".committee");
+    reel.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") hovering = true;
+    });
+    reel.addEventListener("pointerleave", (event) => {
+      if (event.pointerType === "mouse") hovering = false;
+    });
+    // Keyboard focus pauses the drift; a mouse click that focuses the strip
+    // does not, or it would stay paused until something else was clicked.
+    section.addEventListener("focusin", (event) => {
+      focusInside = event.target.matches(":focus-visible");
+    });
+    section.addEventListener("focusout", (event) => {
+      focusInside = Boolean(event.relatedTarget?.matches(":focus-visible") && section.contains(event.relatedTarget));
+    });
+    track.addEventListener(
+      "touchstart",
+      () => {
+        touching = true;
+        velocity = 0;
+      },
+      { passive: true },
+    );
+    const endTouch = () => {
+      touching = false;
+      lastUserScroll = performance.now();
+      holdFor(RESUME_AFTER);
+    };
+    track.addEventListener("touchend", endTouch, { passive: true });
+    track.addEventListener("touchcancel", endTouch, { passive: true });
+
+    // Mouse users without a sideways scroll wheel can drag the strip.
+    if (finePointer.matches) track.classList.add("is-draggable");
+    track.addEventListener("dragstart", (event) => event.preventDefault());
+    track.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      drag = { x: event.clientX, left: track.scrollLeft, id: event.pointerId };
+      velocity = 0;
+      track.setPointerCapture(event.pointerId);
+      track.classList.add("is-dragging");
+    });
+    track.addEventListener("pointermove", (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      track.scrollLeft = drag.left - (event.clientX - drag.x);
+    });
+    const endDrag = (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      drag = null;
+      track.classList.remove("is-dragging");
+      lastUserScroll = performance.now();
+      holdFor(RESUME_AFTER);
+    };
+    track.addEventListener("pointerup", endDrag);
+    track.addEventListener("pointercancel", endDrag);
+
+    nav.hidden = false;
+    nav.querySelectorAll("[data-crew-step]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const direction = Number(button.dataset.crewStep);
+        pos = track.scrollLeft;
+        wrapPos();
+        place(true);
+        const perPage = Math.max(1, Math.floor(track.clientWidth / step));
+        const index = Math.round(pos / step) + direction * perPage;
+        lastUserScroll = performance.now();
+        holdFor(RESUME_AFTER + 2000);
+        track.scrollTo({ left: index * step, behavior: reducedMotion.matches ? "auto" : "smooth" });
+        wake();
+      });
+    });
+
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) {
+          allImages.forEach((image) => {
+            image.loading = "eager";
+          });
+          wake();
+        }
+      },
+      { rootMargin: "300px 0px" },
+    ).observe(track);
+
+    new ResizeObserver(measureCrew).observe(list);
+    measureCrew();
+  }
+
+  const crewTrack = document.querySelector("[data-crew]");
+  if (crewTrack) setUpCrew(crewTrack);
 
   /* ------------------------------------------------------------------ */
   /* Start                                                               */

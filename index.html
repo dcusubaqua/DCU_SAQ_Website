@@ -43,7 +43,6 @@
       <symbol id="i-out" viewBox="0 0 16 16"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
       <symbol id="i-down" viewBox="0 0 16 16"><path d="M8 2.5v11M4 9.5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
       <symbol id="i-up" viewBox="0 0 16 16"><path d="M8 13.5v-11M4 6.5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
-      <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.2v9.6L12.6 8z" fill="currentColor" /></symbol>
 
       <radialGradient id="jellyGlow" cx="50%" cy="35%" r="65%">
         <stop offset="0" stop-color="#f1d8ff" stop-opacity=".55" />
@@ -154,7 +153,7 @@
         </svg>
         <div class="dial-readout">
           <span class="readout-label">Depth</span>
-          <span class="readout-value"><span class="odometer" data-odometer>0.0</span><span class="readout-unit">m</span></span>
+          <span class="readout-value"><span class="odometer" data-odometer>0</span><span class="readout-unit">m</span></span>
           <span class="readout-meta"><span data-temp>13</span>°C</span>
         </div>
       </div>
@@ -162,12 +161,12 @@
       <div class="console-stops" id="console-stops">
         <p class="stops-title" aria-hidden="true">Dive plan</p>
         <ol class="stops">
-          <li><a href="#top" data-stop><span class="stop-depth" data-stop-depth>0 m</span><span class="stop-name">Surface</span></a></li>
+          <li><a href="#top" data-stop><span class="stop-depth" data-stop-depth>3 m</span><span class="stop-name">Home</span></a></li>
           <li><a href="#new-to-diving" data-stop><span class="stop-depth" data-stop-depth>9 m</span><span class="stop-name">Diving</span></a></li>
           <li><a href="#underwater-hockey" data-stop><span class="stop-depth" data-stop-depth>16 m</span><span class="stop-name">Hockey</span></a></li>
-          <li><a href="#calendar" data-stop><span class="stop-depth" data-stop-depth>24 m</span><span class="stop-name">Calendar</span></a></li>
-          <li><a href="#dive-map" data-stop><span class="stop-depth" data-stop-depth>30 m</span><span class="stop-name">Dive map</span></a></li>
-          <li><a href="#committee" data-stop><span class="stop-depth" data-stop-depth>39 m</span><span class="stop-name">Committee</span></a></li>
+          <li><a href="#plan" data-stop><span class="stop-depth" data-stop-depth>24 m</span><span class="stop-name">Calendar</span></a></li>
+          <li><a href="#committee" data-stop><span class="stop-depth" data-stop-depth>32 m</span><span class="stop-name">Committee</span></a></li>
+          <li><a href="#faq" data-stop><span class="stop-depth" data-stop-depth>42 m</span><span class="stop-name">FAQ</span></a></li>
           <li><a href="#sign-up" data-stop><span class="stop-depth" data-stop-depth>48 m</span><span class="stop-name">Join the club</span></a></li>
         </ol>
       </div>
@@ -175,7 +174,6 @@
 
     <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="surface" aria-hidden="true"><span></span><span></span></div>
         <div class="wrap hero-inner">
           <a class="crest" href="#top">
             <span class="crest-mark"><img src="assets/club/logo.webp" width="128" height="85" alt="" /></span>
@@ -261,55 +259,36 @@
         </div>
       </section>
 
-      <section class="section" id="calendar" aria-labelledby="calendar-title">
+      <section class="section plan" id="plan" aria-labelledby="plan-title">
         <div class="wrap">
-          <p class="depth-mark"><b data-depth-at>24 m</b><span>Club calendar</span></p>
-          <div class="panel-head">
-            <h2 id="calendar-title">What’s coming up.</h2>
-            <p>Pool training, club socials and weekend dives. The calendar is kept up to date by the committee.</p>
-          </div>
-          <div class="screen" data-embed-host>
-            <div class="screen-placeholder">
-              <div class="agenda-ghost" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-              <div class="screen-actions">
-                <button class="button" type="button" data-load-embed aria-controls="calendar-embed" hidden>Show the calendar</button>
-                <a class="text-link" href="https://sites.google.com/view/dcusac/calendar">Open calendar <svg class="icon"><use href="#i-out" /></svg></a>
+          <p class="depth-mark"><b data-depth-at>24 m</b><span>Calendar &amp; dive map</span></p>
+          <h2 id="plan-title">Plan your next session.</h2>
+          <div class="resource-grid">
+            <article class="resource-card" id="calendar" data-embed-host>
+              <div class="resource-copy">
+                <span class="resource-icon calendar-icon" aria-hidden="true"></span>
+                <h3>Club calendar</h3>
+                <p>Check what’s coming up, from pool training and club socials to weekend dives.</p>
+                <div class="resource-actions">
+                  <button class="button button-small button-ghost" type="button" data-load-embed aria-controls="calendar-embed" hidden>Show calendar</button>
+                  <a class="text-link" href="https://sites.google.com/view/dcusac/calendar">Open calendar <svg class="icon"><use href="#i-out" /></svg></a>
+                </div>
               </div>
-            </div>
-            <div class="embed" id="calendar-embed" data-embed-title="DCU Sub-Aqua Club calendar" data-embed-src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;ctz=Europe%2FDublin&amp;src=4f1adbd5d45ae0b16334c31351d7c284238a7241f1e8aae44dcfd33daa49e986%40group.calendar.google.com" hidden></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="dive-map" aria-labelledby="map-title">
-        <div class="wrap">
-          <p class="depth-mark"><b data-depth-at>30 m</b><span>Dive map</span></p>
-          <div class="panel-head">
-            <h2 id="map-title">Where we dive.</h2>
-            <p>Explore the club’s map of dive sites around the Irish coast.</p>
-          </div>
-          <div class="screen screen-map" data-embed-host>
-            <div class="screen-placeholder">
-              <img class="screen-art" src="assets/club/coast.webp" width="693" height="520" alt="" loading="lazy" decoding="async" />
-              <div class="screen-actions">
-                <button class="button" type="button" data-load-embed aria-controls="map-embed" hidden>Show the dive map</button>
-                <a class="text-link" href="https://sites.google.com/view/dcusac/club-info/dive-map">Open dive map <svg class="icon"><use href="#i-out" /></svg></a>
+              <div class="embed" id="calendar-embed" data-embed-title="DCU Sub-Aqua Club calendar" data-embed-src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;ctz=Europe%2FDublin&amp;src=4f1adbd5d45ae0b16334c31351d7c284238a7241f1e8aae44dcfd33daa49e986%40group.calendar.google.com" hidden></div>
+            </article>
+            <article class="resource-card map-card" id="dive-map" data-embed-host>
+              <div class="resource-copy">
+                <img class="resource-art" src="assets/club/coast.webp" width="693" height="520" alt="" loading="lazy" decoding="async" />
+                <span class="resource-icon pin-icon" aria-hidden="true"></span>
+                <h3>Dive map</h3>
+                <p>Explore the club’s map of dive sites around the Irish coast.</p>
+                <div class="resource-actions">
+                  <button class="button button-small button-ghost" type="button" data-load-embed aria-controls="map-embed" hidden>Show map</button>
+                  <a class="text-link" href="https://sites.google.com/view/dcusac/club-info/dive-map">Open dive map <svg class="icon"><use href="#i-out" /></svg></a>
+                </div>
               </div>
-            </div>
-            <div class="embed" id="map-embed" data-embed-title="DCU Sub-Aqua Club dive sites" data-embed-src="https://www.google.com/maps/d/embed?mid=1oQCF7Q-XolJqMvRHibrGAma2ssmPlQjU" hidden></div>
-          </div>
-
-          <div class="film">
-            <div class="film-copy">
-              <h3>See it from below.</h3>
-              <p>A short film from club dives.</p>
-            </div>
-            <div class="film-frame">
-              <video controls playsinline preload="none" poster="assets/club/trailer-poster.webp" width="480" height="360" aria-label="DCU Sub-Aqua Club dive video">
-                <source src="trailer.mp4" type="video/mp4" />
-                <a href="trailer.mp4">Open the club dive video</a>
-              </video>
-            </div>
+              <div class="embed" id="map-embed" data-embed-title="DCU Sub-Aqua Club dive sites" data-embed-src="https://www.google.com/maps/d/embed?mid=1oQCF7Q-XolJqMvRHibrGAma2ssmPlQjU" hidden></div>
+            </article>
           </div>
         </div>
       </section>
@@ -317,48 +296,44 @@
       <section class="section committee" id="committee" aria-labelledby="committee-title">
         <div class="wrap">
           <p class="depth-mark"><b data-depth-at>39 m</b><span>2026–27 committee</span></p>
-          <h2 id="committee-title">Meet the team.</h2>
-          <ul class="crew">
-            <li><img src="assets/club/committee/alizee-leleu.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Alizee Leleu</h3><p>President, Diving &amp; Training Officer</p></li>
-            <li><img src="assets/club/committee/naoise-dart.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Naoise d’Art</h3><p>Chairperson</p></li>
-            <li><img src="assets/club/committee/devyani-jambhule.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Devyani Jambhule</h3><p>Treasurer</p></li>
-            <li><img src="assets/club/committee/alana-guckianwalton.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Alana Guckianwalton</h3><p>Vice Chairperson &amp; Secretary</p></li>
-            <li><img src="assets/club/committee/paul-stratan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Paul Stratan</h3><p>Underwater Sports &amp; Assistant Diving Officer</p></li>
-          </ul>
-          <details class="crew-more">
-            <summary><span class="crew-more-open">Show the full committee</span><span class="crew-more-close">Show fewer</span> <small>12 more</small></summary>
-            <ul class="crew">
-              <li><img src="assets/club/committee/conor-pursun.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Conor Pursun</h3><p>Snorkel &amp; Equipment Officer</p></li>
-              <li><img src="assets/club/committee/nat-kolesnyk.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Nat Kolesnyk</h3><p>Boat Officer</p></li>
-              <li><img src="assets/club/committee/konrad-kunkel.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Konrad Kunkel</h3><p>Webmaster</p></li>
-              <li><img src="assets/club/committee/elias-castellano-szczedrin.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Elias Castellano Szczedrin</h3><p>Events Officer</p></li>
-              <li><img src="assets/club/committee/rachel-burke.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Rachel Burke</h3><p>Safety Officer</p></li>
-              <li><img src="assets/club/committee/valentina-arismendiarteta.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Valentina Arismendiarteta</h3><p>Public Relations Officer</p></li>
-              <li><img src="assets/club/committee/mikey-sheridan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Mikey Sheridan</h3><p>First Year Rep</p></li>
-              <li><img src="assets/club/committee/grace-murphy.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Grace Murphy</h3><p>First Year Rep</p></li>
-              <li><img src="assets/club/committee/cara-lau.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Cara Lau</h3><p>Assistant Training Officer</p></li>
-              <li><img src="assets/club/committee/louise-gillet-de-chalonge.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Louise Gillet de Chalonge</h3><p>Assistant Treasurer</p></li>
-              <li><img src="assets/club/committee/matt-fitzpatrick.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Matt Fitzpatrick</h3><p>Assistant Equipment Officer</p></li>
-              <li><img src="assets/club/committee/phil-smyth.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Phil Smyth</h3><p>Assistant Boat Officer</p></li>
-            </ul>
-          </details>
+          <div class="crew-head">
+            <h2 id="committee-title">Meet the team.</h2>
+            <div class="crew-nav" data-crew-nav hidden>
+              <button class="crew-step" type="button" data-crew-step="-1" aria-controls="crew-track"><svg class="icon icon-flip" aria-hidden="true"><use href="#i-arrow" /></svg><span class="visually-hidden">Previous committee members</span></button>
+              <button class="crew-step" type="button" data-crew-step="1" aria-controls="crew-track"><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg><span class="visually-hidden">Next committee members</span></button>
+            </div>
+          </div>
+          <div class="crew-reel">
+            <div class="crew-track" id="crew-track" tabindex="0" role="region" aria-label="Committee members. Scroll sideways to see everyone." data-crew>
+              <ul class="crew">
+                <li><img src="assets/club/committee/alizee-leleu.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Alizee Leleu</h3><p>President, Diving &amp; Training Officer</p></li>
+                <li><img src="assets/club/committee/naoise-dart.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Naoise d’Art</h3><p>Chairperson</p></li>
+                <li><img src="assets/club/committee/devyani-jambhule.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Devyani Jambhule</h3><p>Treasurer</p></li>
+                <li><img src="assets/club/committee/alana-guckianwalton.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Alana Guckianwalton</h3><p>Vice Chairperson &amp; Secretary</p></li>
+                <li><img src="assets/club/committee/paul-stratan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Paul Stratan</h3><p>Underwater Sports &amp; Assistant Diving Officer</p></li>
+                <li><img src="assets/club/committee/conor-pursun.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Conor Pursun</h3><p>Snorkel &amp; Equipment Officer</p></li>
+                <li><img src="assets/club/committee/nat-kolesnyk.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Nat Kolesnyk</h3><p>Boat Officer</p></li>
+                <li><img src="assets/club/committee/konrad-kunkel.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Konrad Kunkel</h3><p>Webmaster</p></li>
+                <li><img src="assets/club/committee/elias-castellano-szczedrin.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Elias Castellano Szczedrin</h3><p>Events Officer</p></li>
+                <li><img src="assets/club/committee/rachel-burke.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Rachel Burke</h3><p>Safety Officer</p></li>
+                <li><img src="assets/club/committee/valentina-arismendiarteta.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Valentina Arismendiarteta</h3><p>Public Relations Officer</p></li>
+                <li><img src="assets/club/committee/mikey-sheridan.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Mikey Sheridan</h3><p>First Year Rep</p></li>
+                <li><img src="assets/club/committee/grace-murphy.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Grace Murphy</h3><p>First Year Rep</p></li>
+                <li><img src="assets/club/committee/cara-lau.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Cara Lau</h3><p>Assistant Training Officer</p></li>
+                <li><img src="assets/club/committee/louise-gillet-de-chalonge.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Louise Gillet de Chalonge</h3><p>Assistant Treasurer</p></li>
+                <li><img src="assets/club/committee/matt-fitzpatrick.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Matt Fitzpatrick</h3><p>Assistant Equipment Officer</p></li>
+                <li><img src="assets/club/committee/phil-smyth.webp" width="300" height="300" alt="" loading="lazy" decoding="async" /><h3>Phil Smyth</h3><p>Assistant Boat Officer</p></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="section join" id="sign-up" aria-labelledby="join-title">
+      <section class="section faq" id="faq" aria-labelledby="faq-title">
         <div class="wrap">
-          <p class="depth-mark"><b data-depth-at>48 m</b><span>Membership</span></p>
-          <div class="join-panel">
-            <div class="join-copy">
-              <h2 id="join-title">Get in the water with us.</h2>
-              <p>Sign in to DCU Clubs &amp; Socs with your DCU account and find Sub Aqua Club to join.</p>
-              <a class="button" href="https://dcuclubsandsocs.ie/club/sub-aqua">Join through DCU <svg class="icon"><use href="#i-out" /></svg></a>
-            </div>
-            <img src="assets/club/club-outing.webp" width="740" height="490" alt="" loading="lazy" decoding="async" />
-          </div>
-
-          <div class="faq" id="faq">
-            <h3 class="faq-title">Before you join</h3>
+          <p class="depth-mark"><b data-depth-at>42 m</b><span>Before you join</span></p>
+          <div class="faq-grid">
+            <h2 id="faq-title">Your questions, answered.</h2>
             <div class="faq-list">
               <details>
                 <summary>Can I join if I’ve never dived?</summary>
@@ -376,6 +351,21 @@
                 <summary>What if I already have a diving qualification?</summary>
                 <p>Get in touch with the club about your qualification. If you trained with another organisation, the club may ask you to complete an equivalency assessment before joining dives.</p>
               </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section join" id="sign-up" aria-labelledby="join-title">
+        <div class="wrap">
+          <p class="depth-mark"><b data-depth-at>48 m</b><span>Join the club</span></p>
+          <div class="join-panel">
+            <img src="assets/club/club-outing.webp" width="740" height="490" alt="" loading="lazy" decoding="async" />
+            <div class="join-copy">
+              <p class="eyebrow">Membership</p>
+              <h2 id="join-title">Get in the water with us.</h2>
+              <p>Sign in to DCU Clubs &amp; Socs with your DCU account and find Sub Aqua Club to join.</p>
+              <a class="button" href="https://dcuclubsandsocs.ie/club/sub-aqua">Join through DCU <svg class="icon"><use href="#i-out" /></svg></a>
             </div>
           </div>
 
@@ -480,7 +470,7 @@
             <a href="https://www.instagram.com/dcusubaqua/">Instagram <svg class="icon"><use href="#i-out" /></svg></a>
             <a href="mailto:DCUSubAquaClub@gmail.com">Email <svg class="icon"><use href="#i-out" /></svg></a>
             <a href="#faq">FAQs</a>
-            <a class="ascend" href="#top">Return to the surface <svg class="icon"><use href="#i-up" /></svg></a>
+            <a class="ascend" href="#top">Back to top <svg class="icon"><use href="#i-up" /></svg></a>
           </nav>
         </div>
       </div>
