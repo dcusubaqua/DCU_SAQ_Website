@@ -88,9 +88,16 @@ p {
   margin-inline: auto;
 }
 
+main {
+  background:
+    radial-gradient(ellipse 72% 24% at 70% 9%, #70e2d02e, transparent 82%),
+    radial-gradient(ellipse 48rem 28rem at 28% calc(100% - 13rem), #3e5c3f42, transparent 80%),
+    linear-gradient(180deg, #18505a 0%, #14414d 21%, #102f43 42%, #0b2339 61%, #091b2f 78%, #071522 100%);
+}
+
 .section {
   padding-block: clamp(3.75rem, 8vw, 7.5rem);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #afced633;
 }
 
 .skip-link {
@@ -297,8 +304,8 @@ p {
 }
 
 .facts-band {
-  border-block: 1px solid var(--line);
-  background: #0d2227;
+  border-block: 1px solid #afced633;
+  background: #081d2640;
 }
 
 .facts {
@@ -316,7 +323,7 @@ p {
 }
 
 .facts div + div {
-  border-left: 1px solid var(--line);
+  border-left: 1px solid #afced633;
   padding-left: clamp(.7rem, 4vw, 3rem);
 }
 
@@ -553,6 +560,10 @@ details > summary {
   background: black;
 }
 
+.committee {
+  --surface: #11283c;
+}
+
 .committee-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -640,7 +651,7 @@ details > summary {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: .75rem;
-  background: #123231;
+  background: linear-gradient(130deg, #244437, #142f2e);
 }
 
 .join-panel img {
@@ -677,7 +688,7 @@ details > summary {
 
 .site-footer {
   border-top: 1px solid var(--line);
-  background: #071418;
+  background: #071522;
 }
 
 .footer-inner {
