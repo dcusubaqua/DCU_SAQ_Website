@@ -18,6 +18,8 @@
   const ocean = document.querySelector(".ocean");
   const canvas = document.querySelector(".ocean-canvas");
   const ctx = canvas.getContext("2d");
+  const surfaceCanvas = document.querySelector(".surface-canvas");
+  const surfCtx = surfaceCanvas && surfaceCanvas.getContext("2d");
   const consoleNav = document.querySelector(".console");
   const toggle = document.querySelector(".console-toggle");
   const toggleLabel = toggle.querySelector(".visually-hidden");
@@ -255,6 +257,9 @@
   let vh = innerHeight;
   let oceanH = vh;
   let maxScroll = 1;
+  // The page height changes when a FAQ answer opens or an embed loads. The
+  // background follows the new height smoothly instead of jumping.
+  let maxScrollTarget = 0;
   let dpr = 1;
   let anchors = stopLinks.map(() => 0);
   let motes = [];
@@ -265,7 +270,7 @@
   // Where the browser lands when you jump to a section, so a stop's depth
   // label matches the gauge after clicking it.
   const arrival = (element) =>
-    clamp(pageTop(element) - (parseFloat(getComputedStyle(element).scrollMarginTop) || 0), 0, maxScroll);
+    clamp(pageTop(element) - (parseFloat(getComputedStyle(element).scrollMarginTop) || 0), 0, maxScrollTarget);
 
   function seedMotes() {
     const count = Math.round(clamp((vw * oceanH) / 9000, 40, 160));
@@ -280,15 +285,26 @@
     }));
   }
 
+  let sizedFor = "";
+
   function measure() {
     vw = innerWidth;
     vh = innerHeight;
     oceanH = ocean.clientHeight || vh;
-    maxScroll = Math.max(1, document.documentElement.scrollHeight - vh);
+    const target = Math.max(1, document.documentElement.scrollHeight - vh);
+    if (!maxScrollTarget || reducedMotion.matches) maxScroll = target;
+    maxScrollTarget = target;
     dpr = Math.min(window.devicePixelRatio || 1, vw < 720 ? 1.5 : 2);
-    canvas.width = Math.round(vw * dpr);
-    canvas.height = Math.round(oceanH * dpr);
-    sizeSchoolLayer();
+    // Resizing a canvas clears it, so only do it when the window changes,
+    // not every time the page gets taller or shorter.
+    const size = `${vw}x${oceanH}@${dpr}`;
+    if (size !== sizedFor) {
+      sizedFor = size;
+      canvas.width = Math.round(vw * dpr);
+      canvas.height = Math.round(oceanH * dpr);
+      sizeSchoolLayer();
+      measureSurface();
+    }
 
     anchors = stopLinks.map((link) => {
       const target = document.getElementById(link.hash.slice(1));
@@ -476,6 +492,97 @@
       lastTheme = now;
       themeColor.setAttribute("content", `rgb(${top.join(",")})`);
     }
+  }
+
+  /* The underside of the surface: near the top of the page you are only a
+     few metres down, so the surface ripples overhead and throws a moving
+     net of light (caustics). It slides away upwards as you descend. Drawn
+     at half resolution; it is soft light, and the CSS blurs it anyway. */
+  let surfaceW = 0;
+  let surfaceH = 0;
+  let surfaceShown = false;
+
+  function measureSurface() {
+    if (!surfCtx) return;
+    surfaceW = Math.ceil(vw / 2);
+    surfaceH = Math.ceil(surfaceCanvas.clientHeight / 2) || 1;
+    surfaceCanvas.width = surfaceW;
+    surfaceCanvas.height = surfaceH;
+    surfaceShown = false;
+  }
+
+  function drawSurface(t, progress, still) {
+    if (!surfCtx) return;
+    const near = 1 - smoothstep(0, 0.2, progress);
+    ocean.style.setProperty("--surface", (1 - near).toFixed(3));
+    if (near <= 0.005) {
+      if (surfaceShown) surfCtx.clearRect(0, 0, surfaceW, surfaceH);
+      surfaceShown = false;
+      return;
+    }
+    if (still && surfaceShown) return;
+    surfaceShown = true;
+    const W = surfaceW;
+    const H = surfaceH;
+    const g = surfCtx;
+    g.clearRect(0, 0, W, H);
+    g.globalCompositeOperation = "source-over";
+
+    // The bright sheet of the surface itself, with a rolling lower edge.
+    const sheet = g.createLinearGradient(0, 0, 0, H * 0.5);
+    sheet.addColorStop(0, "rgba(225, 255, 250, 0.5)");
+    sheet.addColorStop(1, "rgba(190, 245, 240, 0)");
+    g.fillStyle = sheet;
+    g.beginPath();
+    g.moveTo(0, 0);
+    for (let x = 0; x <= W + 8; x += 8) {
+      const y = H * 0.26 + Math.sin(x * 0.011 + t * 0.7) * H * 0.05 + Math.sin(x * 0.027 - t * 1.1) * H * 0.025;
+      g.lineTo(x, y);
+    }
+    g.lineTo(W, 0);
+    g.closePath();
+    g.fill();
+
+    // Two families of wavy lines crossing each other read as the caustic
+    // net. Rows bunch up towards the top, as a surface seen from below does.
+    g.globalCompositeOperation = "lighter";
+    g.lineJoin = "round";
+    const rows = 11;
+    for (let family = 0; family < 2; family += 1) {
+      const dir = family ? -1 : 1;
+      for (let k = 0; k < rows; k += 1) {
+        const f = k / (rows - 1);
+        const base = H * (0.02 + 0.8 * f ** 1.5);
+        const amp = H * (0.03 + 0.05 * f);
+        const fade = (1 - f) ** 1.3;
+        g.strokeStyle = `rgba(215, 255, 248, ${(0.32 * fade).toFixed(3)})`;
+        g.lineWidth = 0.6 + 1.6 * (1 - f);
+        g.beginPath();
+        for (let x = -10; x <= W + 10; x += 7) {
+          const y = base
+            + Math.sin(x * (0.018 - f * 0.006) * (family ? 1.27 : 1) + t * 0.9 * dir + k * 1.7) * amp
+            + Math.sin(x * 0.047 + t * 1.6 * -dir + k * 0.6) * amp * 0.35;
+          if (x === -10) g.moveTo(x, y);
+          else g.lineTo(x, y);
+        }
+        g.stroke();
+      }
+    }
+
+    // Glints where the waves catch the sun.
+    for (let i = 0; i < 26; i += 1) {
+      const x = ((i * 137.5 + t * (8 + (i % 5) * 3)) % (W + 40)) - 20;
+      const y = H * (0.04 + 0.28 * ((i * 0.618) % 1));
+      const pulse = Math.max(0, Math.sin(t * (1.3 + (i % 7) * 0.31) + i * 2.1));
+      if (pulse < 0.35) continue;
+      const r = 6 + (i % 4) * 4;
+      const glint = g.createRadialGradient(x, y, 0, x, y, r);
+      glint.addColorStop(0, `rgba(255, 255, 250, ${(0.4 * pulse).toFixed(3)})`);
+      glint.addColorStop(1, "rgba(255, 255, 250, 0)");
+      g.fillStyle = glint;
+      g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    g.globalCompositeOperation = "source-over";
   }
 
   function placeCreatures(t, scrollY) {
@@ -735,31 +842,20 @@
   /* Seabed torch                                                        */
   /* ------------------------------------------------------------------ */
 
-  // The footer scene is lit by one torch. A canvas over the three seabed
-  // layers paints the dark water with a pool of light cut out of it, the
-  // beam coming down from above, and silt that sparkles where the light
-  // catches it. The torch sweeps the wreck first, then the ridges behind
-  // it; the further away it lands, the wider, flatter and dimmer the pool.
+  // The footer scene is lit softly by the pointer. A canvas over the three
+  // seabed layers dims the water a little, less towards the front, and
+  // lifts it to full brightness in a soft pool wherever the pointer is.
+  // Silt sparkles where the light catches it. On touch screens a tap moves
+  // the light; until then it drifts slowly over the wreck.
 
   const seabed = document.querySelector(".seabed");
   const seabedLayers = document.querySelector(".seabed-layers");
   const torchCanvas = document.querySelector(".torch-light");
   const tctx = torchCanvas ? torchCanvas.getContext("2d") : null;
 
-  // Stops as fractions of the seabed picture, with how long to linger.
-  // far: 0 on the wreck, 1 on the ridges behind it.
-  const TORCH_PATH = [
-    { x: 0.8, y: 0.44, far: 0, hold: 3.2 }, // the bow and the anchor
-    { x: 0.55, y: 0.6, far: 0, hold: 2.6 }, // the hole in the hull
-    { x: 0.27, y: 0.64, far: 0, hold: 2.8 }, // the stern and its sea fan
-    { x: 0.13, y: 0.5, far: 1, hold: 3.2 }, // out to the rock arch behind
-    { x: 0.47, y: 0.32, far: 0.3, hold: 2 }, // over the bridge
-    { x: 0.94, y: 0.5, far: 1, hold: 3.2 }, // and the pinnacle on the right
-  ];
-  const DARK = [1, 6, 10];
-  const AMBIENT = 0.92; // how dark the water is away from the light
-  // Torch switching on: [seconds, brightness], held until the next step.
-  const FLICKER = [[0, 0], [0.1, 0.7], [0.16, 0.08], [0.3, 0.9], [0.36, 0.25], [0.52, 1]];
+  const DARK = [2, 10, 16];
+  const AMBIENT = 0.5; // how dim the water is away from the light, at the back
+  const FRONT_LIFT = 0.4; // share of that taken off again at the front
 
   const torch = {
     w: 0,
@@ -767,52 +863,20 @@
     scale: 1,
     pic: { x: 0, y: 0, w: 1, h: 1 }, // the picture's box inside the scene
     spot: null,
-    aim: { x: 0, y: 0 },
-    stop: 0,
-    timer: 0,
-    held: -Infinity, // when the pointer or a tap last aimed the torch
-    lit: -1, // time the torch was switched on, -1 until the scene is seen
+    aim: null,
+    held: -Infinity, // when the pointer or a tap last moved the light
+    lit: -1, // when the scene was first seen, -1 until then
     visible: false,
     drawn: false,
     pointer: { x: 0.5, y: 0.5 },
     silt: [],
   };
 
-  // The beam: a soft-edged wedge, narrow at the torch and wide where it
-  // lands, painted once into a small image and stretched into place.
-  const beamSprite = (() => {
-    const w = 64;
-    const h = 256;
-    const c = document.createElement("canvas");
-    c.width = w;
-    c.height = h;
-    const g = c.getContext("2d");
-    const img = g.createImageData(w, h);
-    for (let y = 0; y < h; y += 1) {
-      const v = y / (h - 1);
-      const half = 0.07 + 0.93 * v;
-      const along = smoothstep(0, 0.3, v) * (1 - 0.4 * v);
-      for (let x = 0; x < w; x += 1) {
-        const u = Math.abs((x + 0.5) / w - 0.5) * 2;
-        const across = 1 - smoothstep(0.35, 1, u / half);
-        const i = (y * w + x) * 4;
-        img.data[i] = 214;
-        img.data[i + 1] = 240;
-        img.data[i + 2] = 232;
-        img.data[i + 3] = Math.round(255 * along * across * across);
-      }
-    }
-    g.putImageData(img, 0, 0);
-    return c;
-  })();
-
-  // A stop on the tour, in scene pixels. On narrow screens the picture is
-  // wider than the scene, so stops off to the side are pulled back into view.
-  const tourStop = (i) => {
-    const stop = TORCH_PATH[i];
-    const x = torch.pic.x + stop.x * torch.pic.w;
-    return { x: clamp(x, torch.w * 0.1, torch.w * 0.9), y: torch.pic.y + stop.y * torch.pic.h, far: stop.far };
-  };
+  // Where the light rests before anyone points: the middle of the wreck.
+  const restingSpot = () => ({
+    x: clamp(torch.pic.x + 0.55 * torch.pic.w, torch.w * 0.2, torch.w * 0.8),
+    y: torch.pic.y + 0.56 * torch.pic.h,
+  });
 
   function measureTorch() {
     if (!tctx) return;
@@ -821,110 +885,83 @@
     torch.w = seabed.clientWidth;
     torch.h = seabed.clientHeight;
     torch.scale = Math.min(dpr, 1.25);
-    torchCanvas.width = Math.round(torch.w * torch.scale);
-    torchCanvas.height = Math.round(torch.h * torch.scale);
+    const tw = Math.round(torch.w * torch.scale);
+    const th = Math.round(torch.h * torch.scale);
+    if (torchCanvas.width !== tw || torchCanvas.height !== th) {
+      torchCanvas.width = tw;
+      torchCanvas.height = th;
+      torch.drawn = false;
+    }
     torch.pic = { x: pic.left - scene.left, y: pic.top - scene.top, w: pic.width, h: pic.height };
-    if (!torch.spot) torch.spot = tourStop(0);
-    torch.aim = tourStop(torch.stop);
+    if (!torch.spot) torch.spot = restingSpot();
+    if (!torch.aim) torch.aim = restingSpot();
     if (!torch.silt.length) {
       for (let i = 0; i < 90; i += 1) {
         torch.silt.push({ x: Math.random(), y: rand(0.25, 1), r: rand(0.6, 1.8), drift: rand(-0.004, 0.004), sink: rand(0.002, 0.008), phase: Math.random() * TAU });
       }
     }
-    torch.drawn = false;
-  }
-
-  function torchBrightness(now) {
-    if (torch.lit < 0) return 0;
-    const s = (now - torch.lit) / 1000;
-    let value = 0;
-    for (const [at, v] of FLICKER) if (s >= at) value = v;
-    return value;
   }
 
   function updateTorch(now, dt, still) {
     if (!tctx || !torch.visible || !torch.spot) return;
     if (still && torch.drawn) return;
     const t = now / 1000;
-    if (torch.lit < 0) torch.lit = still ? now - 1000 : now;
+    if (torch.lit < 0) torch.lit = still ? now - 2000 : now;
 
-    // Where to aim: the pointer while it's in use, otherwise the tour.
+    // Touch screens with nobody tapping: drift slowly over the wreck.
     const pic = torch.pic;
-    const aimed = now - torch.held < 4000;
-    if (!aimed && !still) {
-      torch.timer += dt;
-      if (torch.timer > TORCH_PATH[torch.stop].hold + 2.4) {
-        torch.timer = 0;
-        torch.stop = (torch.stop + 1) % TORCH_PATH.length;
-        torch.aim = tourStop(torch.stop);
-      }
+    if (!finePointer.matches && !still && now - torch.held > 6000) {
+      const rest = restingSpot();
+      torch.aim = {
+        x: rest.x + Math.sin(t * 0.21) * Math.min(pic.w * 0.28, torch.w * 0.3),
+        y: rest.y + Math.sin(t * 0.33 + 1) * pic.h * 0.1,
+      };
     }
-    const ease = still ? 1 : 1 - Math.exp(-dt * (aimed ? 5 : 0.9));
+    const ease = still ? 1 : 1 - Math.exp(-dt * 7);
     torch.spot.x += (torch.aim.x - torch.spot.x) * ease;
     torch.spot.y += (torch.aim.y - torch.spot.y) * ease;
-    torch.spot.far += (torch.aim.far - torch.spot.far) * ease;
-    // A hand-held torch never sits perfectly still.
-    const wobble = still ? 0 : 1;
-    const px = torch.spot.x + (Math.sin(t * 1.3) * 3 + Math.sin(t * 3.1) * 1.5) * wobble;
-    const py = torch.spot.y + (Math.cos(t * 1.1) * 2 + Math.sin(t * 2.7) * 1.2) * wobble;
+    const px = torch.spot.x;
+    const py = torch.spot.y;
 
-    // On the ridges behind the wreck the light has further to go: the pool
-    // spreads wider, flattens out and loses strength.
-    const far = torch.spot.far;
-    const rx = pic.w * (0.13 + 0.07 * far);
-    const ry = rx * (0.62 - 0.14 * far);
-    const power = torchBrightness(now) * (1 - 0.32 * far) * (0.96 + 0.04 * Math.sin(t * 1.7));
+    // Fade in the first time the scene comes into view.
+    const power = smoothstep(0, 900, now - torch.lit);
+    const r = clamp(pic.w * 0.2, 170, 300);
 
     const g = tctx;
     g.setTransform(torch.scale, 0, 0, torch.scale, 0, 0);
     g.clearRect(0, 0, torch.w, torch.h);
 
-    // Dark water with the pool of light cut out of it.
-    const dark = (alpha) => `rgb(${DARK[0]} ${DARK[1]} ${DARK[2]} / ${(AMBIENT - (AMBIENT - alpha) * power).toFixed(3)})`;
-    g.save();
-    g.translate(px, py);
-    g.scale(rx, ry);
-    const pool = g.createRadialGradient(0, 0, 0, 0, 0, 1);
-    pool.addColorStop(0, dark(0.02 + 0.12 * far));
-    pool.addColorStop(0.45, dark(0.08 + 0.16 * far));
-    pool.addColorStop(0.75, dark(0.42 + 0.14 * far));
-    pool.addColorStop(1, dark(AMBIENT));
+    // Dim water with a soft pool of light cut out of it. No hard edge and
+    // no beam: it reads as the place you are looking, not a spotlight.
+    const dark = (k) => `rgb(${DARK[0]} ${DARK[1]} ${DARK[2]} / ${(AMBIENT * (1 - (1 - k) * power)).toFixed(3)})`;
+    const pool = g.createRadialGradient(px, py, 0, px, py, r * 1.6);
+    pool.addColorStop(0, dark(0));
+    pool.addColorStop(0.3, dark(0.06));
+    pool.addColorStop(0.62, dark(0.45));
+    pool.addColorStop(1, dark(1));
     g.fillStyle = pool;
-    const reach = Math.max(torch.w / rx, torch.h / ry) * 2 + 2;
-    g.fillRect(-reach, -reach, reach * 2, reach * 2);
-    g.restore();
+    g.fillRect(0, 0, torch.w, torch.h);
 
-    // The beam, from above and to the right, following the pointer a little.
-    const sx = torch.w * (0.86 + (torch.pointer.x - 0.5) * 0.08);
-    const sy = -torch.h * 0.25;
-    const dx = px - sx;
-    const dy = py - sy;
-    const len = Math.hypot(dx, dy);
-    const endW = rx * 1.7;
-    g.save();
-    g.globalAlpha = 0.2 * power;
-    g.translate(sx, sy);
-    g.rotate(Math.atan2(dy, dx) - Math.PI / 2);
-    g.drawImage(beamSprite, -endW / 2, 0, endW, len);
-    g.restore();
+    // Nearer things catch more of the light: thin the dimming towards the
+    // bottom of the picture, where the sand and the near rocks are.
+    g.globalCompositeOperation = "destination-out";
+    const front = g.createLinearGradient(0, pic.y + pic.h * 0.35, 0, pic.y + pic.h);
+    front.addColorStop(0, "rgb(0 0 0 / 0)");
+    front.addColorStop(1, `rgb(0 0 0 / ${FRONT_LIFT})`);
+    g.fillStyle = front;
+    g.fillRect(0, 0, torch.w, torch.h);
 
-    // The glow where it lands, and a hotter middle.
-    g.save();
-    g.translate(px, py);
-    g.scale(rx, ry);
-    const glow = g.createRadialGradient(0, 0, 0, 0, 0, 1.05);
-    glow.addColorStop(0, `rgb(230 248 238 / ${(0.13 * power).toFixed(3)})`);
-    glow.addColorStop(0.35, `rgb(214 240 232 / ${(0.07 * power).toFixed(3)})`);
-    glow.addColorStop(1, "rgb(214 240 232 / 0)");
+    // A gentle lift in the middle of the pool.
+    g.globalCompositeOperation = "lighter";
+    const glow = g.createRadialGradient(px, py, 0, px, py, r);
+    glow.addColorStop(0, `rgb(150 200 195 / ${(0.12 * power).toFixed(3)})`);
+    glow.addColorStop(0.5, `rgb(120 180 180 / ${(0.05 * power).toFixed(3)})`);
+    glow.addColorStop(1, "rgb(120 180 180 / 0)");
     g.fillStyle = glow;
-    g.beginPath();
-    g.arc(0, 0, 1.05, 0, TAU);
-    g.fill();
-    g.restore();
+    g.fillRect(px - r, py - r, r * 2, r * 2);
+    g.globalCompositeOperation = "source-over";
 
-    // Silt: barely there in the dark, bright inside the beam.
-    const ux = dx / len;
-    const uy = dy / len;
+    // Silt: faint everywhere, bright in the light.
     g.fillStyle = "rgb(225 245 238)";
     for (const p of torch.silt) {
       if (!still) {
@@ -934,16 +971,8 @@
       }
       const qx = p.x * torch.w + Math.sin(t * 0.6 + p.phase) * 6;
       const qy = p.y * torch.h + Math.cos(t * 0.5 + p.phase) * 4;
-      const ox = qx - sx;
-      const oy = qy - sy;
-      const along = (ox * ux + oy * uy) / len;
-      const side = Math.abs(ox * uy - oy * ux);
-      const half = (endW / 2) * (0.07 + 0.93 * clamp(along, 0, 1));
-      const inBeam = along > 0.15 && along < 1.05 ? 1 - smoothstep(0.4, 1, side / half) : 0;
-      const ex = (qx - px) / rx;
-      const ey = (qy - py) / ry;
-      const inPool = 1 - smoothstep(0.3, 1, Math.hypot(ex, ey));
-      const a = (0.04 + 0.55 * Math.max(inBeam, inPool)) * power;
+      const inPool = 1 - smoothstep(0.25, 1, Math.hypot(qx - px, qy - py) / r);
+      const a = (0.05 + 0.6 * inPool) * power;
       if (a < 0.015) continue;
       g.globalAlpha = a;
       g.fillRect(qx, qy, p.r, p.r);
@@ -957,11 +986,7 @@
     const x = clientX - scene.left;
     const y = clientY - scene.top;
     if (x < 0 || x > scene.width || y < 0 || y > scene.height) return false;
-    // Keep the light on the scene rather than up on the footer text.
-    const aimY = Math.max(y, torch.pic.y + torch.pic.h * 0.22);
-    // High in the picture means past the wreck, on the ridges behind it.
-    const far = clamp((0.56 - (aimY - torch.pic.y) / torch.pic.h) / 0.2, 0, 1);
-    torch.aim = { x, y: aimY, far };
+    torch.aim = { x, y };
     torch.held = performance.now();
     return true;
   }
@@ -1020,12 +1045,17 @@
     lastFrame = now;
     const still = reducedMotion.matches;
     const t = still ? 0 : now / 1000;
+    if (maxScroll !== maxScrollTarget) {
+      maxScroll += (maxScrollTarget - maxScroll) * (1 - Math.exp(-dt * 5));
+      if (Math.abs(maxScrollTarget - maxScroll) < 0.5) maxScroll = maxScrollTarget;
+    }
     const scrollY = clamp(window.scrollY, 0, maxScroll);
     const scrollDelta = scrollY - lastScroll;
     lastScroll = scrollY;
     const progress = clamp(scrollY / maxScroll, 0, 1);
 
     updateWater(progress, now);
+    drawSurface(t, progress, still);
     updateConsole(dt, scrollY, firstFrame || still);
     placeCreatures(t, scrollY);
 
@@ -1052,6 +1082,89 @@
       { passive: true },
     );
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Photo carousels                                                     */
+  /* ------------------------------------------------------------------ */
+
+  // A scroll-snapping strip: swipe or scroll it, use the arrows (they wrap
+  // round at the ends) or the arrow keys. It moves on by itself every few
+  // seconds while it is on screen, unless you are pointing at it, have
+  // focused it, or prefer reduced motion.
+  document.querySelectorAll("[data-gallery]").forEach((gallery) => {
+    const track = gallery.querySelector(".gallery-track");
+    const slides = [...track.children];
+    const dots = [...gallery.querySelectorAll(".gallery-dots span")];
+    const caption = gallery.querySelector(".gallery-caption");
+    let current = -1;
+    let paused = false;
+    let seen = false;
+
+    const show = (i) => {
+      if (i === current) return;
+      current = i;
+      dots.forEach((dot, k) => dot.classList.toggle("is-current", k === i));
+      caption.textContent = slides[i].dataset.caption;
+    };
+    const go = (i) => {
+      const next = (i + slides.length) % slides.length;
+      track.scrollTo({ left: next * track.clientWidth, behavior: reducedMotion.matches ? "auto" : "smooth" });
+    };
+
+    track.addEventListener("scroll", () => show(clamp(Math.round(track.scrollLeft / track.clientWidth), 0, slides.length - 1)), { passive: true });
+    gallery.querySelectorAll("[data-gallery-step]").forEach((button) => {
+      button.addEventListener("click", () => go(current + Number(button.dataset.galleryStep)));
+    });
+    track.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      go(current + (event.key === "ArrowRight" ? 1 : -1));
+    });
+    gallery.addEventListener("pointerenter", () => { paused = true; });
+    gallery.addEventListener("pointerleave", () => { paused = false; });
+    gallery.addEventListener("focusin", () => { paused = true; });
+    gallery.addEventListener("focusout", () => { paused = false; });
+    new IntersectionObserver(([entry]) => { seen = entry.isIntersecting; }, { threshold: 0.5 }).observe(gallery);
+    setInterval(() => {
+      if (seen && !paused && !reducedMotion.matches && !document.hidden) go(current + 1);
+    }, 6000);
+    show(0);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* FAQ                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  // Answers slide open and shut instead of jumping. The <details> element
+  // still works on its own without this (and with reduced motion).
+  document.querySelectorAll(".faq-list details").forEach((item) => {
+    const summary = item.querySelector("summary");
+    const answer = item.querySelector("p");
+    let motion = null;
+    let closing = false;
+
+    summary.addEventListener("click", (event) => {
+      if (reducedMotion.matches || !item.animate) return;
+      event.preventDefault();
+      const from = item.offsetHeight;
+      if (motion) motion.cancel();
+      closing = item.open && !closing;
+      if (!closing) item.open = true;
+      const to = closing ? summary.offsetHeight + item.offsetHeight - item.clientHeight : item.offsetHeight;
+      item.classList.add("is-moving");
+      motion = item.animate({ height: [`${from}px`, `${to}px`] }, { duration: 340, easing: "cubic-bezier(.3, 0, .2, 1)" });
+      if (answer) {
+        answer.animate({ opacity: closing ? [1, 0] : [0, 1], translate: closing ? ["0 0", "0 -6px"] : ["0 -6px", "0 0"] }, { duration: 340, easing: "ease-out", fill: closing ? "forwards" : "none" });
+      }
+      motion.onfinish = () => {
+        if (closing) item.open = false;
+        closing = false;
+        motion = null;
+        item.classList.remove("is-moving");
+        if (answer) answer.getAnimations().forEach((a) => a.cancel());
+      };
+    });
+  });
 
   /* ------------------------------------------------------------------ */
   /* Embeds                                                              */
