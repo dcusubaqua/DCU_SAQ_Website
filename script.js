@@ -758,17 +758,19 @@
 
   let breathIn = 2.5;
 
+  // A burst of bubbles from a diver somewhere below. While the hero diver
+  // is on screen he does his own breathing (see "Diver's breath" below).
   function breathe() {
     const rect = regulator && regulator.getBoundingClientRect();
-    const fromDiver = rect && rect.top > -20 && rect.top < vh;
+    if (rect && rect.top > -20 && rect.top < vh) return;
     const count = Math.round(rand(9, 15));
-    const x = fromDiver ? rect.left : rand(vw * 0.12, vw * 0.82);
-    const y = fromDiver ? rect.top : oceanH + 24;
+    const x = rand(vw * 0.12, vw * 0.82);
+    const y = oceanH + 24;
     for (let i = 0; i < count; i += 1) {
       bubbles.push({
         x: x + rand(-4, 4),
         y: y + rand(-3, 3),
-        r: rand(1.4, fromDiver ? 4.6 : 6),
+        r: rand(1.4, 6),
         phase: Math.random() * TAU,
         wobble: rand(8, 22),
         age: -i * rand(0.03, 0.08),
@@ -1056,6 +1058,73 @@
     seabedLayers.style.setProperty("--rise", rise);
     seabedLayers.style.setProperty("--px", px);
     seabedLayers.style.setProperty("--py", py);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Diver's breath                                                      */
+  /* ------------------------------------------------------------------ */
+
+  // The hero diver breathes like a real diver: one exhale comes out of the
+  // regulator as two or three puffs (a few big bubbles, then smaller ones,
+  // venting to both sides of the mouthpiece), then nothing while he breathes
+  // in. Drawn as small elements in front of the photo so they rise past his
+  // face. Sizes are tuned for a 546px-wide diver and scale with him.
+  if (regulator) {
+    const diver = regulator.closest(".hero-diver");
+    let diverOnScreen = true;
+
+    new IntersectionObserver(([entry]) => {
+      diverOnScreen = entry.isIntersecting;
+    }).observe(diver);
+
+    const releaseBubble = (delay, big, k) => {
+      const size = big ? rand(7, 11) : rand(3, 6.5);
+      const d = size * k;
+      const side = Math.random() < 0.55 ? -1 : 1;
+      const spread = side * rand(2, 9) * k;
+      const rise = rand(240, 330) * k;
+      const lean = rand(-16, 4) * k;
+      const wobble = rand(2, 5) * k;
+      const phase = rand(0, TAU);
+      const keyframes = [];
+      for (let i = 0; i <= 8; i += 1) {
+        const f = i / 8;
+        keyframes.push({
+          offset: f,
+          opacity: i === 0 ? 0 : i === 8 ? 0 : i === 1 ? 0.9 : 0.9 - f * 0.4,
+          transform: `translate(${(spread * (1 + f) + lean * f + Math.sin(phase + i * 1.3) * wobble * f).toFixed(1)}px, ${(-rise * f ** 1.15).toFixed(1)}px) scale(${(0.6 + f * 0.7).toFixed(2)})`,
+        });
+      }
+      const el = document.createElement("span");
+      el.className = "breath-bubble";
+      el.style.setProperty("--d", `${d.toFixed(1)}px`);
+      regulator.append(el);
+      // Bigger bubbles rise faster.
+      const duration = (rise / ((55 + size * 8) * k)) * 1000;
+      el.animate(keyframes, { duration, delay, easing: "linear", fill: "backwards" }).finished.then(
+        () => el.remove(),
+        () => el.remove(),
+      );
+    };
+
+    const exhale = () => {
+      if (diverOnScreen && !document.hidden && !reducedMotion.matches) {
+        const k = diver.clientWidth / 546;
+        const puffs = Math.random() < 0.6 ? 3 : 2;
+        let at = 0;
+        for (let p = 0; p < puffs; p += 1) {
+          const count = Math.round(p === 0 ? rand(5, 8) : rand(3, 6));
+          for (let i = 0; i < count; i += 1) {
+            releaseBubble(at + i * rand(25, 70), p === 0 && i < 2, k);
+          }
+          at += rand(380, 520);
+        }
+      }
+      // About 1.3 s breathing out, then 2.5 to 3.3 s breathing in.
+      setTimeout(exhale, rand(3800, 4600));
+    };
+
+    setTimeout(exhale, 900);
   }
 
   /* ------------------------------------------------------------------ */
