@@ -1653,7 +1653,7 @@ p {
   /* Room above and before the photos for the stars, which stick out past
      the corner (the strip scrolls sideways, so anything outside it would be
      cut, and its edges fade out). */
-  padding: 2.1rem 1.25rem 0 2.6rem;
+  padding: 2.3rem 1.25rem 0 2.85rem;
 }
 
 .crew li {
@@ -1678,9 +1678,9 @@ p {
 .star {
   --tilt: -16deg;
   --lift: .55rem;
-  width: clamp(2.7rem, 7vw, 3.6rem);
-  height: clamp(2.7rem, 7vw, 3.6rem);
-  margin-right: -.55rem;
+  width: clamp(2.97rem, 7.7vw, 3.96rem);
+  height: clamp(2.97rem, 7.7vw, 3.96rem);
+  margin-right: -.6rem;
   translate: 0 var(--lift);
   rotate: var(--tilt);
   filter: drop-shadow(0 3px 2px rgb(60 25 0 / .45)) drop-shadow(0 0 10px rgb(255 190 40 / .35));
