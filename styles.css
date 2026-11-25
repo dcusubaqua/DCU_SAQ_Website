@@ -1785,20 +1785,35 @@ p {
 
 /* Join */
 
-/* One compact panel: a heading and the three things you can do. */
+/* One compact panel: the club photo beside a heading and three buttons. */
 .join-panel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem 2.5rem;
-  padding: clamp(1.75rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+  overflow: hidden;
   border: 1px solid rgb(140 200 240 / .22);
   border-radius: 10px;
   background:
     radial-gradient(90% 120% at 0% 0%, rgb(90 180 240 / .2), transparent 60%),
     linear-gradient(130deg, #164468, #0b2840 60%, #081d31);
   box-shadow: 0 50px 100px -50px rgb(0 0 0 / .8);
+}
+
+.join-panel img {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 16rem;
+  object-fit: cover;
+}
+
+.join-body {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.75rem, 4vw, 3rem);
 }
 
 .join-copy {
@@ -1813,6 +1828,17 @@ p {
 
 .join-copy p:not(.eyebrow) {
   color: #cfe2ee;
+}
+
+.join-actions {
+  gap: .75rem;
+}
+
+/* Narrower screens: photo becomes a short strip above the text. */
+@media (max-width: 860px) {
+  .join-panel { grid-template-columns: minmax(0, 1fr); }
+  .join-panel img { grid-column: 1; grid-row: 1; height: 13rem; min-height: 0; }
+  .join-body { grid-row: 2; }
 }
 
 /* On phones the three buttons stack at the same full width. */
