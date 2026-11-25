@@ -1825,17 +1825,70 @@ p {
   color: #cfe2ee;
 }
 
-.join-copy .button {
-  margin-top: .5rem;
+/* The three steps to join, numbered, leading down to the one button. */
+.join-steps {
+  display: grid;
+  gap: .75rem;
+  margin: .25rem 0 .4rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: join;
 }
 
+.join-steps li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: .85rem;
+  align-items: start;
+  counter-increment: join;
+}
+
+.join-steps li::before {
+  content: counter(join);
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgb(198 255 228 / .14);
+  box-shadow: inset 0 0 0 1px rgb(198 255 228 / .45);
+  color: var(--lume);
+  font: 600 .85rem/1 var(--mono);
+}
+
+.join-steps strong {
+  padding-top: .3rem;
+  color: var(--text);
+  font-weight: 650;
+}
+
+.join-steps span {
+  color: #a9c6d6;
+  font-size: .92rem;
+}
+
+.join-button {
+  min-height: 3.4rem;
+  padding-inline: 1.6rem;
+  font-size: 1.02rem;
+  box-shadow: 0 14px 30px -14px rgb(150 255 210 / .55);
+}
+
+/* Questions: two big cards, each one link. The form is the main way in,
+   so it is the bright one. */
 .contact {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr);
   align-items: center;
-  justify-content: space-between;
   gap: 1.25rem 2.5rem;
-  padding-top: clamp(1.75rem, 4vh, 2.5rem);
+  margin-top: clamp(1.25rem, 3vh, 2rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid rgb(140 200 240 / .18);
+  border-radius: 10px;
+  background: rgb(6 28 48 / .55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .contact h3 {
@@ -1845,6 +1898,123 @@ p {
 
 .contact p {
   margin-top: .35rem;
+}
+
+.contact-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .9rem;
+}
+
+.contact-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  gap: .35rem .85rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: 8px;
+  background: rgb(230 250 250 / .05);
+  box-shadow: inset 0 0 0 1px rgb(230 250 250 / .22);
+  color: var(--text);
+  transition: background-color 180ms ease, box-shadow 180ms ease, translate 180ms ease;
+}
+
+.contact-card:hover {
+  background: rgb(230 250 250 / .09);
+  box-shadow: inset 0 0 0 1px var(--lume);
+  translate: 0 -2px;
+}
+
+.contact-card:focus-visible {
+  outline: 2px solid var(--lume);
+  outline-offset: 3px;
+}
+
+.contact-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: .1rem;
+  color: var(--lume);
+}
+
+.contact-text {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.contact-text strong {
+  font-size: 1.08rem;
+  font-weight: 650;
+}
+
+.contact-text span {
+  color: var(--muted);
+  font-size: .9rem;
+  overflow-wrap: break-word;
+}
+
+.contact-go {
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: .45rem;
+  color: var(--lume);
+  font-weight: 600;
+  font-size: .92rem;
+}
+
+.contact-card:hover .contact-go .icon {
+  translate: 3px 0;
+}
+
+.contact-card-main {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgb(198 255 228 / .28), transparent 60%),
+    linear-gradient(135deg, #1e6a7c, #134a62);
+  box-shadow: inset 0 0 0 1.5px rgb(198 255 228 / .7), 0 18px 44px -18px rgb(120 240 200 / .55);
+}
+
+.contact-card-main:hover {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgb(198 255 228 / .3), transparent 60%),
+    linear-gradient(135deg, #20677d, #164a66);
+}
+
+.contact-card-main .contact-text span {
+  color: #d4ece9;
+}
+
+.contact-card-main .contact-go {
+  justify-self: start;
+  padding: .45rem .9rem;
+  border-radius: 4px;
+  background: var(--mint);
+  color: var(--mint-ink);
+}
+
+.contact-card-main:hover .contact-go {
+  background: var(--mint-hover);
+}
+
+@media (max-width: 860px) {
+  .contact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .contact-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .join-button {
+    justify-self: stretch;
+    padding-inline: 1rem;
+    font-size: .98rem;
+    text-align: center;
+  }
 }
 
 /* ==========================================================================
@@ -1904,6 +2074,7 @@ p {
 .wreck {
   --shift: -14px;
   --lift: 40px;
+  filter: brightness(.88);
 }
 
 .seabed-near {
@@ -2006,6 +2177,91 @@ p {
 
 .wreck-hole {
   fill: #020506;
+}
+
+/* Easter egg: a moray living in the hull breach. Its eyes blink in the
+   dark; pointing at the hole (or tapping it) makes it pop out. */
+.egg-eyes {
+  fill: #dcff9c;
+  transform-box: view-box;
+  transform-origin: 641px 291px;
+  animation: egg-blink 5.5s infinite;
+  transition: opacity 150ms ease;
+}
+
+.egg-eel {
+  transform-box: view-box;
+  transform-origin: 644px 299px;
+  scale: .12;
+  opacity: 0;
+  transition: scale 260ms ease-in, opacity 200ms ease-in 60ms;
+}
+
+.wreck-egg.is-out .egg-eyes {
+  opacity: 0;
+}
+
+.wreck-egg.is-out .egg-eel {
+  scale: 1;
+  opacity: 1;
+  transition: scale 520ms cubic-bezier(.3, 1.55, .5, 1), opacity 120ms ease-out;
+  animation: egg-sway 2.4s ease-in-out infinite alternate;
+}
+
+.egg-body {
+  fill: none;
+  stroke: #4c6631;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.egg-fin {
+  fill: none;
+  stroke: #6f8c45;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.egg-head {
+  fill: #58763a;
+}
+
+.egg-jaw {
+  fill: none;
+  stroke: #1f2c14;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.egg-teeth,
+.egg-eye {
+  fill: #f3f8dc;
+}
+
+.egg-spots {
+  fill: #2c3d1c;
+}
+
+.egg-pupil {
+  fill: #0b0f06;
+}
+
+@keyframes egg-blink {
+  0%, 93%, 100% { scale: 1 1; }
+  95% { scale: 1 .1; }
+  97% { scale: 1 1; }
+}
+
+@keyframes egg-sway {
+  from { rotate: -5deg; }
+  to { rotate: 4deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .egg-eyes,
+  .wreck-egg.is-out .egg-eel {
+    animation: none;
+  }
 }
 
 .wreck-bent {
@@ -2177,6 +2433,11 @@ p {
 
 .seabed-links a:hover {
   color: var(--lume);
+}
+
+.seabed-links .link-logo {
+  width: 1.2em;
+  height: 1.2em;
 }
 
 .seabed-links .ascend {

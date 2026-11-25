@@ -48,6 +48,9 @@
         <stop offset=".45" stop-color="#ffd23a" />
         <stop offset="1" stop-color="#ff9a1f" />
       </linearGradient>
+      <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5.2" fill="none" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="1.8" /><circle cx="17.4" cy="6.6" r="1.15" fill="currentColor" /></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M4.2 7.4l7.8 6 7.8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-form" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
       <symbol id="i-star" viewBox="-1 -1 26 26"><path d="M12 2.6l2.85 6.05 6.6.8-4.87 4.56 1.27 6.56L12 17.3l-5.85 3.27 1.27-6.56L2.55 9.45l6.6-.8z" fill="url(#starGold)" stroke="#b5620a" stroke-width=".7" stroke-linejoin="round" /><path d="M7.6 10.5l2.5-.35 1.15-2.45" fill="none" stroke="#fff" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" opacity=".75" /><circle cx="15.6" cy="12.3" r=".75" fill="#fff" opacity=".55" /></symbol>
 
       <radialGradient id="jellyGlow" cx="50%" cy="35%" r="65%">
@@ -435,19 +438,32 @@
             <div class="join-copy">
               <p class="eyebrow">Membership</p>
               <h2 id="join-title">Get in the water with us.</h2>
-              <p>Sign in to DCU Clubs &amp; Socs with your DCU account and find Sub Aqua Club to join.</p>
-              <a class="button" href="https://dcuclubsandsocs.ie/club/sub-aqua">Join through DCU <svg class="icon"><use href="#i-out" /></svg></a>
+              <p>Membership runs through DCU Clubs &amp; Socs, not this website. Three steps:</p>
+              <ol class="join-steps">
+                <li><strong>Open DCU Clubs &amp; Socs</strong><span>The button below takes you straight to our club page.</span></li>
+                <li><strong>Sign in with your DCU account</strong><span>The same login you use for other DCU services.</span></li>
+                <li><strong>Press Join on the Sub Aqua Club page</strong><span>Then come along to the next session.</span></li>
+              </ol>
+              <a class="button join-button" href="https://dcuclubsandsocs.ie/club/sub-aqua">Join on DCU Clubs &amp; Socs <svg class="icon"><use href="#i-out" /></svg></a>
             </div>
           </div>
 
           <div class="contact" id="contact">
-            <div>
-              <h3>Have a question?</h3>
+            <div class="contact-intro">
+              <h3>Have a question first?</h3>
               <p>Ask the committee about membership, training or your first session.</p>
             </div>
-            <div class="actions">
-              <a class="button button-ghost" href="mailto:DCUSubAquaClub@gmail.com">Email the club <svg class="icon"><use href="#i-out" /></svg></a>
-              <a class="text-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfaBE-psJpXyAn4UMsQmy1IJpQ2NKkzcFEiXy3AeHKLNQ8C9Q/viewform">Contact form <svg class="icon"><use href="#i-out" /></svg></a>
+            <div class="contact-options">
+              <a class="contact-card contact-card-main" href="https://docs.google.com/forms/d/e/1FAIpQLSfaBE-psJpXyAn4UMsQmy1IJpQ2NKkzcFEiXy3AeHKLNQ8C9Q/viewform">
+                <svg class="contact-icon" aria-hidden="true"><use href="#i-form" /></svg>
+                <span class="contact-text"><strong>Contact form</strong><span>Send us your question and we’ll get back to you.</span></span>
+                <span class="contact-go">Open the form <svg class="icon"><use href="#i-out" /></svg></span>
+              </a>
+              <a class="contact-card" href="mailto:DCUSubAquaClub@gmail.com">
+                <svg class="contact-icon" aria-hidden="true"><use href="#i-mail" /></svg>
+                <span class="contact-text"><strong>Email the club</strong><span>DCUSubAquaClub@<wbr />gmail.com</span></span>
+                <span class="contact-go">Write an email <svg class="icon"><use href="#i-out" /></svg></span>
+              </a>
             </div>
           </div>
         </div>
@@ -529,6 +545,19 @@
                 <path class="wreck-hole" d="M612 262l18-10 14 6 20-8 10 14 22 4-6 18 12 16-18 8 2 18-24-6-14 14-12-16-22 4 2-20-16-12 14-12z" />
                 <path class="wreck-bent" d="M612 262l18-10 14 6 20-8 10 14 22 4M640 336l-12-16-22 4 2-20" />
               </g>
+              <!-- Someone lives in the hole: two eyes blink in the dark, and a moray pops out when you point at it (or tap it). -->
+              <g class="wreck-egg">
+                <g class="egg-eyes"><circle cx="633" cy="292" r="4.5" opacity=".18" /><circle cx="649" cy="290" r="4.5" opacity=".18" /><circle cx="633" cy="292" r="2.1" /><circle cx="649" cy="290" r="2.1" /></g>
+                <g class="egg-eel">
+                  <path class="egg-body" d="M648 300C634 314 616 320 600 313" />
+                  <path class="egg-fin" d="M646 294C632 306 616 311 603 305" />
+                  <path class="egg-head" d="M606 304c-9-8-27-8-35 2 3 9 22 14 35 7z" />
+                  <path class="egg-jaw" d="M572 308c9 3 19 2 27-2" />
+                  <path class="egg-teeth" d="M578 308.6l1.4 2.4 1.2-2.6zM585 308.9l1.3 2.3 1.2-2.6zM592 307.8l1.2 2.1 1.1-2.4z" />
+                  <g class="egg-spots"><circle cx="630" cy="310" r="1.6" /><circle cx="619" cy="315" r="1.3" /><circle cx="640" cy="303" r="1.4" /><circle cx="611" cy="316.5" r="1.1" /><circle cx="597" cy="301" r="1" /></g>
+                  <circle class="egg-eye" cx="590" cy="303.5" r="2.7" /><circle class="egg-pupil" cx="589.3" cy="303.3" r="1.2" />
+                </g>
+              </g>
               <path class="wreck-rim" d="M78 236l1012-66 26-6" />
               <path class="wreck-rail" d="M92 235.1v-11M109 234v-11M126 232.9v-11M143 231.8v-11M160 230.7v-11M177 229.5v-11M194 228.4v-11M211 227.3v-11M228 226.2v-11M245 225.1v-11M262 224v-11M279 222.9v-11M296 221.8v-11M364 217.3v-11M381 216.2v-11M398 215.1v-11M415 214v-11M721 194.1v-11M738 193v-11M755 191.8v-11M772 190.7v-11M789 189.6v-11M806 188.5v-11M874 184.1v-11M891 183v-11M908 181.9v-11M925 180.8v-11M942 179.7v-11M959 178.5v-11M976 177.4v-11M993 176.3v-11M1010 175.2v-11M1027 174.1v-11M1044 173v-11M1061 171.9v-11M1078 170.8v-11M92 224.1L296 210.8M364 206.3L415 203M721 183.1L806 177.5M874 173.1L1078 159.8M92 229.6L296 216.3M364 211.8L415 208.5M721 188.6L806 183M874 178.6L1078 165.3" />
               <g class="wreck-portholes"><circle cx="200" cy="268" r="7" /><circle cx="256" cy="264.4" r="7" /><circle cx="312" cy="260.8" r="7" /><circle cx="368" cy="257.2" r="7" /><circle cx="424" cy="253.6" r="7" /><circle cx="480" cy="250" r="7" /><circle cx="536" cy="246.4" r="7" /><circle cx="592" cy="242.8" r="7" /><circle cx="648" cy="239.2" r="7" /><circle cx="704" cy="235.6" r="7" /><circle cx="760" cy="232" r="7" /><circle cx="816" cy="228.4" r="7" /><circle cx="872" cy="224.8" r="7" /><circle cx="928" cy="221.2" r="7" /></g>
@@ -585,8 +614,8 @@
             </a>
           </div>
           <nav class="seabed-links" aria-label="Footer">
-            <a href="https://www.instagram.com/dcusubaqua/">Instagram <svg class="icon"><use href="#i-out" /></svg></a>
-            <a href="mailto:DCUSubAquaClub@gmail.com">Email <svg class="icon"><use href="#i-out" /></svg></a>
+            <a href="https://www.instagram.com/dcusubaqua/"><svg class="icon link-logo" aria-hidden="true"><use href="#i-instagram" /></svg>Instagram</a>
+            <a href="mailto:DCUSubAquaClub@gmail.com"><svg class="icon link-logo" aria-hidden="true"><use href="#i-mail" /></svg>Email</a>
             <a href="#faq">FAQs</a>
             <a class="ascend" href="#top">Back to top <svg class="icon"><use href="#i-up" /></svg></a>
           </nav>

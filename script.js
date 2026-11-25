@@ -854,7 +854,7 @@
   const tctx = torchCanvas ? torchCanvas.getContext("2d") : null;
 
   const DARK = [2, 10, 16];
-  const AMBIENT = 0.6; // how dim the water is away from the light, at the back
+  const AMBIENT = 0.66; // how dim the water is away from the light, at the back
   const FRONT_LIFT = 0.35; // share of that taken off again at the front
 
   const torch = {
@@ -981,6 +981,26 @@
     torch.drawn = true;
   }
 
+  // Easter egg: the moray in the hull breach pops out while you point at
+  // the hole, and ducks back in a moment after you move away.
+  const hole = document.querySelector(".wreck-hole");
+  const egg = document.querySelector(".wreck-egg");
+  let eggTimer = 0;
+
+  function overHole(clientX, clientY) {
+    if (!hole || !egg) return false;
+    const r = hole.getBoundingClientRect();
+    const dx = (clientX - (r.left + r.width / 2)) / (r.width / 2);
+    const dy = (clientY - (r.top + r.height / 2)) / (r.height / 2);
+    return dx * dx + dy * dy < 0.75;
+  }
+
+  function peek(ms) {
+    egg.classList.add("is-out");
+    clearTimeout(eggTimer);
+    eggTimer = setTimeout(() => egg.classList.remove("is-out"), ms);
+  }
+
   function aimTorch(clientX, clientY) {
     const scene = seabed.getBoundingClientRect();
     const x = clientX - scene.left;
@@ -1000,7 +1020,10 @@
     ).observe(seabed);
 
     seabed.addEventListener("pointerdown", (event) => {
-      if (event.pointerType !== "mouse") aimTorch(event.clientX, event.clientY);
+      if (event.pointerType !== "mouse") {
+        aimTorch(event.clientX, event.clientY);
+        if (overHole(event.clientX, event.clientY)) peek(3000);
+      }
     });
 
     if (finePointer.matches) {
@@ -1009,7 +1032,10 @@
         (event) => {
           torch.pointer.x = event.clientX / vw;
           torch.pointer.y = event.clientY / vh;
-          if (torch.visible) aimTorch(event.clientX, event.clientY);
+          if (torch.visible) {
+            aimTorch(event.clientX, event.clientY);
+            if (overHole(event.clientX, event.clientY)) peek(1200);
+          }
         },
         { passive: true },
       );
