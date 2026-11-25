@@ -34,7 +34,7 @@ Then visit `http://localhost:8000`.
 
 ## Updating club content
 
-The committee roster is the list in the `#committee` section of `index.html`; add or remove `<li>` entries there and the carousel adapts. Each card shows one to three big gold qualification stars on the top-left corner of the photo, on a gentle curve and bobbing slightly: set `data-stars` on the `<li>`, put that many `<svg class="star">` icons in its `.stars` span, and update the span's `aria-label` to match. The current star counts are placeholders. Portraits live in
+The committee roster is the list in the `#committee` section of `index.html`; add or remove `<li>` entries there and the carousel adapts. Each card shows one to three big gold qualification stars on the top-left corner of the photo, on a gentle curve: set `data-stars` on the `<li>`, put that many `<svg class="star">` icons in its `.stars` span, and update the span's `aria-label` to match. Someone with no stars has `data-stars="0"` and no `.stars` span. Portraits live in
 `assets/club/committee/`. Update the committee year, names, roles, and photos together at the start of a new term.
 
 Club photos, committee details and contact form come from the [original club site](https://sites.google.com/view/dcusac/).
