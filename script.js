@@ -854,8 +854,8 @@
   const tctx = torchCanvas ? torchCanvas.getContext("2d") : null;
 
   const DARK = [2, 10, 16];
-  const AMBIENT = 0.5; // how dim the water is away from the light, at the back
-  const FRONT_LIFT = 0.4; // share of that taken off again at the front
+  const AMBIENT = 0.6; // how dim the water is away from the light, at the back
+  const FRONT_LIFT = 0.35; // share of that taken off again at the front
 
   const torch = {
     w: 0,
@@ -1087,15 +1087,14 @@
   /* Photo carousels                                                     */
   /* ------------------------------------------------------------------ */
 
-  // A scroll-snapping strip: swipe or scroll it, use the arrows (they wrap
-  // round at the ends) or the arrow keys. It moves on by itself every few
+  // A scroll-snapping strip: swipe or scroll it, press a dot, or use the
+  // arrow keys (they wrap round at the ends). It moves on by itself every few
   // seconds while it is on screen, unless you are pointing at it, have
   // focused it, or prefer reduced motion.
   document.querySelectorAll("[data-gallery]").forEach((gallery) => {
     const track = gallery.querySelector(".gallery-track");
     const slides = [...track.children];
-    const dots = [...gallery.querySelectorAll(".gallery-dots span")];
-    const caption = gallery.querySelector(".gallery-caption");
+    const dots = [...gallery.querySelectorAll(".gallery-dots button")];
     let current = -1;
     let paused = false;
     let seen = false;
@@ -1103,8 +1102,10 @@
     const show = (i) => {
       if (i === current) return;
       current = i;
-      dots.forEach((dot, k) => dot.classList.toggle("is-current", k === i));
-      caption.textContent = slides[i].dataset.caption;
+      dots.forEach((dot, k) => {
+        dot.classList.toggle("is-current", k === i);
+        dot.setAttribute("aria-pressed", String(k === i));
+      });
     };
     const go = (i) => {
       const next = (i + slides.length) % slides.length;
@@ -1112,9 +1113,7 @@
     };
 
     track.addEventListener("scroll", () => show(clamp(Math.round(track.scrollLeft / track.clientWidth), 0, slides.length - 1)), { passive: true });
-    gallery.querySelectorAll("[data-gallery-step]").forEach((button) => {
-      button.addEventListener("click", () => go(current + Number(button.dataset.galleryStep)));
-    });
+    dots.forEach((dot, k) => dot.addEventListener("click", () => go(k)));
     track.addEventListener("keydown", (event) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
