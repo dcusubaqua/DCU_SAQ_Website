@@ -1176,12 +1176,29 @@ p {
   animation: diver-wave 3.6s ease-in-out infinite alternate;
 }
 
+/* The regulator's exhaust, beside the diver's mouth. script.js releases
+   his exhaled bubbles from here, in front of the photo, so they rise past
+   his face instead of appearing from behind his head. */
 .regulator {
   position: absolute;
-  top: 37%;
-  left: 78%;
-  width: 2px;
-  height: 2px;
+  top: 38%;
+  left: 87.6%;
+  width: 0;
+  height: 0;
+}
+
+.breath-bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--d);
+  height: var(--d);
+  margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  border: 1px solid rgb(235 250 255 / .7);
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / .95) 0 13%, rgb(220 245 255 / .2) 34%, rgb(200 240 255 / .06) 62%, transparent 72%);
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 @keyframes diver-drift {
