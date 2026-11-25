@@ -1785,10 +1785,14 @@ p {
 
 /* Join */
 
+/* One compact panel: a heading and the three things you can do. */
 .join-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+  padding: clamp(1.75rem, 4vw, 3rem);
   border: 1px solid rgb(140 200 240 / .22);
   border-radius: 10px;
   background:
@@ -1797,58 +1801,23 @@ p {
   box-shadow: 0 50px 100px -50px rgb(0 0 0 / .8);
 }
 
-.join-panel img {
-  grid-column: 2;
-  grid-row: 1;
-  width: 100%;
-  height: 100%;
-  min-height: 20rem;
-  object-fit: cover;
-}
-
 .join-copy {
-  grid-column: 1;
-  grid-row: 1;
-  align-self: center;
   display: grid;
-  justify-items: start;
-  gap: 1rem;
-  padding: clamp(1.75rem, 5vw, 4.5rem);
+  gap: .75rem;
+  max-width: 34rem;
 }
 
 .join-copy h2 {
-  font-size: clamp(2.3rem, 4.4vw, 4rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
 }
 
 .join-copy p:not(.eyebrow) {
-  max-width: 40ch;
   color: #cfe2ee;
 }
 
-.join-copy .dive-plan {
-  justify-self: stretch;
-}
-
-.join-copy .button {
-  margin-top: .5rem;
-}
-
-.contact {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem 2.5rem;
-  padding-top: clamp(1.75rem, 4vh, 2.5rem);
-}
-
-.contact h3 {
-  font-size: clamp(1.45rem, 2.2vw, 1.8rem);
-  font-stretch: 80%;
-}
-
-.contact p {
-  margin-top: .35rem;
+/* On phones the three buttons stack at the same full width. */
+@media (max-width: 560px) {
+  .join-actions { display: grid; width: 100%; gap: .75rem; }
 }
 
 /* ==========================================================================
@@ -2488,20 +2457,6 @@ p {
     max-width: none;
   }
 
-  .join-panel {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .join-panel img,
-  .join-copy {
-    grid-column: auto;
-    grid-row: auto;
-  }
-
-  .join-panel img {
-    min-height: 0;
-    aspect-ratio: 16 / 9;
-  }
 }
 
 @media (max-width: 720px) {
